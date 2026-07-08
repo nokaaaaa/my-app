@@ -25,11 +25,18 @@ app.get("/", async (req, res) => {
 // ユーザー追加のルート
 app.post("/users", async (req, res) => {
   const name = req.body.name;
+  // フォームから送られた年齢を数値に変換する（空なら null）
+  const age = req.body.age ? Number(req.body.age) : null;
+
   if (name) {
-    await prisma.user.create({ data: { name } });
+    const newUser = await prisma.user.create({
+      data: { name, age }
+    });
+    console.log("追加されたユーザー:", newUser);
   }
   res.redirect("/");
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

@@ -2,19 +2,20 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ユーザー一覧</title>
+  <title>ユーザー一覧（年齢対応版）</title>
 </head>
 <body>
   <h1>ユーザー一覧</h1>
   <ul>
     <% users.forEach(user => { %>
-      <li><%= user.name %></li>
+      <li><%= user.name %> - <%= user.age ? user.age + ' 歳' : '年齢未設定' %></li>
     <% }) %>
   </ul>
 
   <h2>ユーザー追加</h2>
   <form action="/users" method="post">
-    <input type="text" name="name" placeholder="ユーザー名を入力" required>
+    <input type="text" name="name" placeholder="名前を入力" required>
+    <input type="number" name="age" placeholder="年齢を入力">
     <button type="submit">追加</button>
   </form>
 </body>
