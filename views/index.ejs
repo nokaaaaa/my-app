@@ -173,9 +173,10 @@
     .more { font-size:18px; }
     .fab { right:24px; bottom:24px; width:auto; height:42px; padding:0 15px; border-radius:9px; font-size:11px; }
     .fab::after { content:' タスクを追加'; margin-left:4px; }
-    .tutorial-backdrop { position:fixed; inset:0; z-index:80; background:rgba(2,5,10,.62); }
+    .tutorial-backdrop { position:static; }
     .tutorial-backdrop[hidden] { display:none; }
-    .tutorial-card { position:fixed; z-index:92; left:50%; bottom:34px; transform:translateX(-50%); width:min(430px,calc(100% - 28px)); border:1px solid rgba(85,233,238,.25); border-radius:13px; padding:21px; background:#0d1320; box-shadow:0 24px 80px rgba(0,0,0,.55); }
+    .tutorial-shade { position:fixed; inset:0; z-index:80; background:rgba(2,5,10,.62); }
+    .tutorial-card { position:fixed; z-index:100; left:50%; bottom:34px; transform:translateX(-50%); width:min(430px,calc(100% - 28px)); border:1px solid rgba(85,233,238,.25); border-radius:13px; padding:21px; background:#0d1320; box-shadow:0 24px 80px rgba(0,0,0,.55); }
     .tutorial-step { color:var(--cyan); font:8px DM Mono; letter-spacing:.14em; }
     .tutorial-card h3 { margin:9px 0 7px; font-size:17px; }
     .tutorial-card p { margin:0; color:#8994a5; font-size:11px; line-height:1.7; }
@@ -183,7 +184,8 @@
     .tutorial-actions button { border:0; background:transparent; color:#6f7b8e; padding:8px; cursor:pointer; font-size:10px; }
     .tutorial-actions .tutorial-next { min-width:92px; border:1px solid var(--cyan); border-radius:7px; color:#061014; background:var(--cyan); font-weight:700; }
     .tutorial-parent-focus { position:relative!important; z-index:90!important; }
-    .tutorial-focus { position:relative!important; z-index:91!important; box-shadow:0 0 0 3px rgba(85,233,238,.7),0 0 38px rgba(85,233,238,.4)!important; }
+    .tutorial-focus { z-index:91!important; box-shadow:0 0 0 3px rgba(85,233,238,.7),0 0 38px rgba(85,233,238,.4)!important; }
+    .project-add.tutorial-focus { position:relative; }
 
     @media (max-width: 760px) { body{overflow:auto}.app{height:auto;min-height:100vh;display:block}.topbar{height:62px;position:sticky;top:0;padding:0 14px;gap:10px}.brand span,.system-state,.user-meta{display:none}.project-bar{min-width:0}.project-select{min-width:0;width:100%;}.project-add{font-size:0;padding:9px 12px}.project-add::after{content:'＋';font-size:14px}.avatar{margin-left:0}.workspace{height:calc(100vh - 62px);min-height:600px}.details{top:auto;left:12px;right:12px;bottom:12px;width:auto;max-height:55vh}.fab{right:16px;bottom:16px}.workspace-head{inset:18px}.task-node{--size:84px!important}.legend{flex-wrap:wrap;width:230px}.zoom-note{display:none} }
   </style>
@@ -263,6 +265,7 @@
   </dialog>
 
   <div class="tutorial-backdrop" id="tutorial" hidden>
+    <div class="tutorial-shade"></div>
     <section class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
       <div class="tutorial-step" id="tutorialStep">STEP 1 / 4</div>
       <h3 id="tutorialTitle"></h3>
