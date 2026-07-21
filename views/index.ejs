@@ -173,7 +173,7 @@
     .more { font-size:18px; }
     .fab { right:24px; bottom:24px; width:auto; height:42px; padding:0 15px; border-radius:9px; font-size:11px; }
     .fab::after { content:' タスクを追加'; margin-left:4px; }
-    .tutorial-backdrop { position:fixed; inset:0; z-index:80; background:rgba(2,5,10,.72); backdrop-filter:blur(2px); }
+    .tutorial-backdrop { position:fixed; inset:0; z-index:80; background:rgba(2,5,10,.62); }
     .tutorial-backdrop[hidden] { display:none; }
     .tutorial-card { position:fixed; z-index:92; left:50%; bottom:34px; transform:translateX(-50%); width:min(430px,calc(100% - 28px)); border:1px solid rgba(85,233,238,.25); border-radius:13px; padding:21px; background:#0d1320; box-shadow:0 24px 80px rgba(0,0,0,.55); }
     .tutorial-step { color:var(--cyan); font:8px DM Mono; letter-spacing:.14em; }
@@ -182,7 +182,8 @@
     .tutorial-actions { display:flex; align-items:center; justify-content:space-between; margin-top:18px; }
     .tutorial-actions button { border:0; background:transparent; color:#6f7b8e; padding:8px; cursor:pointer; font-size:10px; }
     .tutorial-actions .tutorial-next { min-width:92px; border:1px solid var(--cyan); border-radius:7px; color:#061014; background:var(--cyan); font-weight:700; }
-    .tutorial-focus { position:relative!important; z-index:91!important; box-shadow:0 0 0 3px rgba(85,233,238,.35),0 0 35px rgba(85,233,238,.22)!important; }
+    .tutorial-parent-focus { position:relative!important; z-index:90!important; }
+    .tutorial-focus { position:relative!important; z-index:91!important; box-shadow:0 0 0 3px rgba(85,233,238,.7),0 0 38px rgba(85,233,238,.4)!important; }
 
     @media (max-width: 760px) { body{overflow:auto}.app{height:auto;min-height:100vh;display:block}.topbar{height:62px;position:sticky;top:0;padding:0 14px;gap:10px}.brand span,.system-state,.user-meta{display:none}.project-bar{min-width:0}.project-select{min-width:0;width:100%;}.project-add{font-size:0;padding:9px 12px}.project-add::after{content:'＋';font-size:14px}.avatar{margin-left:0}.workspace{height:calc(100vh - 62px);min-height:600px}.details{top:auto;left:12px;right:12px;bottom:12px;width:auto;max-height:55vh}.fab{right:16px;bottom:16px}.workspace-head{inset:18px}.task-node{--size:84px!important}.legend{flex-wrap:wrap;width:230px}.zoom-note{display:none} }
   </style>
@@ -383,10 +384,11 @@
       {target:'.workspace',title:'タスクのつながりを見る',text:'球体の位置と線から関係性を確認できます。球体を押すと、タスクの詳細が開きます。'}
     ];
     let tutorialIndex=0;
-    function showTutorial(index=0){document.querySelectorAll('.tutorial-focus').forEach(el=>el.classList.remove('tutorial-focus'));tutorialIndex=index;const step=tutorialSteps[index],target=document.querySelector(step.target);target?.classList.add('tutorial-focus');document.getElementById('tutorialStep').textContent=`STEP ${index+1} / ${tutorialSteps.length}`;document.getElementById('tutorialTitle').textContent=step.title;document.getElementById('tutorialText').textContent=step.text;document.getElementById('tutorialNext').textContent=index===tutorialSteps.length-1?'はじめる':'次へ';document.getElementById('tutorial').hidden=false;}
-    function finishTutorial(){document.querySelectorAll('.tutorial-focus').forEach(el=>el.classList.remove('tutorial-focus'));document.getElementById('tutorial').hidden=true;tutorialCompleted=true;save();}
-    document.getElementById('tutorialNext').onclick=()=>tutorialIndex<tutorialSteps.length-1?showTutorial(tutorialIndex+1):finishTutorial();
-    document.getElementById('tutorialSkip').onclick=finishTutorial;
+    function clearTutorialFocus(){document.querySelectorAll('.tutorial-focus').forEach(el=>el.classList.remove('tutorial-focus'));document.querySelectorAll('.tutorial-parent-focus').forEach(el=>el.classList.remove('tutorial-parent-focus'));}
+    function showTutorial(index=0){clearTutorialFocus();tutorialIndex=index;const step=tutorialSteps[index],target=document.querySelector(step.target);const topbar=target?.closest('.topbar');if(topbar&&target!==topbar)topbar.classList.add('tutorial-parent-focus');target?.classList.add('tutorial-focus');document.getElementById('tutorialStep').textContent=`STEP ${index+1} / ${tutorialSteps.length}`;document.getElementById('tutorialTitle').textContent=step.title;document.getElementById('tutorialText').textContent=step.text;document.getElementById('tutorialNext').textContent=index===tutorialSteps.length-1?'タスクを追加して始める':'次へ';document.getElementById('tutorial').hidden=false;}
+    function finishTutorial(startTask=false){clearTutorialFocus();document.getElementById('tutorial').hidden=true;tutorialCompleted=true;save();if(startTask)setTimeout(()=>document.getElementById('addBtn').click(),120);}
+    document.getElementById('tutorialNext').onclick=()=>tutorialIndex<tutorialSteps.length-1?showTutorial(tutorialIndex+1):finishTutorial(true);
+    document.getElementById('tutorialSkip').onclick=()=>finishTutorial(false);
     document.getElementById('tutorialHelp').onclick=()=>showTutorial(0);
     window.addEventListener('resize',drawLinks); setInterval(drawLinks,120);
     renderProjects();render();
