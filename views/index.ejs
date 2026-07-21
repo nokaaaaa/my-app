@@ -139,6 +139,9 @@
     .field label {color:#697487;font:9px DM Mono;letter-spacing:.08em;}
     .field input,.field select {width:100%;border:1px solid var(--line);background:#090e18;color:var(--text);border-radius:7px;padding:11px;outline:none;font-size:12px;}
     .field input:focus,.field select:focus {border-color:rgba(85,233,238,.5);}
+    .connection-preview { display:flex; align-items:center; gap:9px; margin-top:8px; padding:9px 10px; border:1px solid rgba(168,129,255,.2); border-radius:7px; background:rgba(168,129,255,.055); color:#8b96a8; font-size:9px; }
+    .connection-preview i { width:7px; height:7px; border-radius:50%; background:var(--violet); box-shadow:0 0 9px var(--violet); }
+    .connection-preview b { color:#d8ddea; font-weight:500; }
     .modal-actions {display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
     .modal-actions button {border:1px solid var(--line);border-radius:7px;background:transparent;padding:9px 15px;cursor:pointer;font-size:10px;}
     .modal-actions .primary {background:var(--cyan);border-color:var(--cyan);color:#061014;font-weight:700;}
@@ -207,7 +210,7 @@
       <header><h3>新しいタスクを追加</h3><button class="close" id="closeDialog" type="button">×</button></header>
       <div class="field"><label>タスク名</label><input name="title" placeholder="何をする必要がありますか？" required maxlength="42"></div>
       <div class="field"><label>カテゴリー</label><select name="category"><option value="product">プロダクト</option><option value="research">リサーチ</option><option value="personal">個人</option></select></div>
-      <div class="field"><label>接続するタスク</label><select name="parent" id="parentSelect"></select></div>
+      <div class="field"><label>接続先（選択中の球体）</label><select name="parent" id="parentSelect"></select><div class="connection-preview"><i></i><span><b id="connectionName">ローンチ戦略</b> から関係線をつなぎます</span></div></div>
       <div class="field"><label>優先度</label><select name="priority"><option value="HIGH">高</option><option value="MEDIUM" selected>中</option><option value="LOW">低</option></select></div>
       <div class="modal-actions"><button id="cancelDialog" type="button">キャンセル</button><button class="primary" type="submit">タスクを追加</button></div>
     </form>
@@ -231,12 +234,16 @@
     const seedLinks = [
       ['research','launch','blocks','cyan'],['launch','prototype','related','violet'],['launch','design','blocks','cyan'],['prototype','metrics','supports','lime'],['design','brief','supports','lime'],['launch','metrics','related','violet'],['launch','brief','supports','lime'],['qa','design','blocks','cyan'],['brief','retro','related','violet'],['prototype','research','related','violet'],['metrics','retro','supports','lime']
     ];
-    let tasks;
-    try { tasks = JSON.parse(localStorage.getItem('nexus-tasks-ja-v1')) || seedTasks; } catch { tasks = seedTasks; }
-    let links = [...seedLinks], selectedId = 'launch', currentFilter = 'all';
+    let tasks, links;
+    try {
+      const savedState = JSON.parse(localStorage.getItem('nexus-state-ja-v2'));
+      tasks = savedState?.tasks || seedTasks;
+      links = savedState?.links || [...seedLinks];
+    } catch { tasks = seedTasks; links = [...seedLinks]; }
+    let selectedId = 'launch', currentFilter = 'all';
     const graph = document.getElementById('graph'), svg = document.getElementById('links');
 
-    function save(){ localStorage.setItem('nexus-tasks-ja-v1',JSON.stringify(tasks)); }
+    function save(){ localStorage.setItem('nexus-state-ja-v2',JSON.stringify({tasks,links})); }
     function visible(t){ if(currentFilter==='all')return true;if(currentFilter==='done')return t.done;if(currentFilter==='priority')return t.priority==='HIGH'&&!t.done;if(currentFilter==='today')return t.today&&!t.done;return t.category===currentFilter&&!t.done; }
     function render(){
       graph.querySelectorAll('.task-node').forEach(n=>n.remove()); svg.innerHTML='';
@@ -273,8 +280,22 @@
     document.getElementById('recenter').onclick=()=>{currentFilter='all';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));document.getElementById('viewTitle').textContent='プロジェクト・ネクサス';render();};
     const dialog=document.getElementById('taskDialog'),form=document.getElementById('taskForm');
     document.getElementById('closeDialog').onclick=()=>dialog.close(); document.getElementById('cancelDialog').onclick=()=>dialog.close();
-    document.getElementById('addBtn').onclick=()=>{const s=document.getElementById('parentSelect');s.innerHTML=tasks.filter(t=>!t.done).map(t=>`<option value="${t.id}">${t.title}</option>`).join('');dialog.showModal();};
-    form.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(form),title=String(fd.get('title')).trim();if(!title)return;const id='task-'+Date.now(),colors=['cyan','violet','lime','orange','pink'];tasks.push({id,title,short:title,category:fd.get('category'),priority:fd.get('priority'),x:25+Math.random()*50,y:27+Math.random()*52,size:82,color:colors[tasks.length%colors.length],progress:0,due:'新規タスク',description:'新しく作成されたタスクです。詳しい内容を追加し、次の行動を整理しましょう。',checks:[['次の行動を決める',false]],today:false});links.push([String(fd.get('parent')),id,'related','violet']);selectedId=id;currentFilter='all';save();dialog.close();form.reset();render();selectTask(id);});
+    function updateConnectionPreview(){const parent=tasks.find(t=>t.id===document.getElementById('parentSelect').value);document.getElementById('connectionName').textContent=parent?.short||parent?.title||'選択したタスク';}
+    document.getElementById('addBtn').onclick=()=>{
+      const s=document.getElementById('parentSelect'), activeTask=tasks.find(t=>t.id===selectedId);
+      s.innerHTML=tasks.map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
+      if(activeTask) s.value=activeTask.id;
+      updateConnectionPreview(); dialog.showModal(); form.querySelector('[name="title"]').focus();
+    };
+    document.getElementById('parentSelect').onchange=updateConnectionPreview;
+    form.addEventListener('submit',e=>{
+      e.preventDefault(); const fd=new FormData(form),title=String(fd.get('title')).trim(); if(!title)return;
+      const id='task-'+Date.now(), parentId=String(fd.get('parent')), parent=tasks.find(t=>t.id===parentId), colors=['cyan','violet','lime','orange','pink'];
+      const siblingCount=links.filter(l=>l[0]===parentId||l[1]===parentId).length, angle=(siblingCount*67+35)*Math.PI/180;
+      const x=Math.max(12,Math.min(88,(parent?.x??50)+Math.cos(angle)*19)), y=Math.max(20,Math.min(84,(parent?.y??50)+Math.sin(angle)*16));
+      tasks.push({id,title,short:title,category:fd.get('category'),priority:fd.get('priority'),x,y,size:82,color:colors[tasks.length%colors.length],progress:0,due:'新規タスク',description:'新しく作成されたタスクです。詳しい内容を追加し、次の行動を整理しましょう。',checks:[['次の行動を決める',false]],today:false});
+      links.push([parentId,id,'related','violet']); selectedId=id; currentFilter='all'; save(); dialog.close(); form.reset(); render(); selectTask(id);
+    });
     window.addEventListener('resize',drawLinks); setInterval(drawLinks,120);
     render();selectTask(selectedId);
   </script>
