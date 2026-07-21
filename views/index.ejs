@@ -2,21 +2,278 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ユーザー一覧（年齢対応版）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b15">
+  <title>NEXUS — Spatial Task System</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #070a12;
+      --panel: rgba(15, 20, 34, .72);
+      --panel-solid: #101522;
+      --line: rgba(153, 180, 211, .13);
+      --muted: #717d91;
+      --text: #eef3f8;
+      --cyan: #55e9ee;
+      --violet: #a881ff;
+      --lime: #b8f26d;
+      --orange: #ffad66;
+      --pink: #ff72b6;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      color: var(--text);
+      background:
+        radial-gradient(circle at 62% 40%, rgba(34, 80, 100, .16), transparent 32%),
+        radial-gradient(circle at 85% 8%, rgba(87, 58, 129, .10), transparent 28%),
+        var(--bg);
+      font-family: Inter, "Noto Sans JP", sans-serif;
+      overflow: hidden;
+    }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+
+    .app { height: 100vh; min-height: 680px; display: grid; grid-template-columns: 228px 1fr 304px; grid-template-rows: 72px 1fr; }
+    .topbar { grid-column: 1 / -1; display: flex; align-items: center; border-bottom: 1px solid var(--line); padding: 0 22px; z-index: 20; background: rgba(7,10,18,.7); backdrop-filter: blur(18px); }
+    .brand { width: 206px; display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .22em; font-size: 13px; }
+    .brand-mark { width: 30px; height: 30px; border: 1px solid rgba(85,233,238,.6); position: relative; transform: rotate(45deg); border-radius: 7px; box-shadow: inset 0 0 14px rgba(85,233,238,.15), 0 0 16px rgba(85,233,238,.12); }
+    .brand-mark::before { content: ""; position: absolute; inset: 8px; border: 1px solid var(--cyan); border-radius: 50%; }
+    .brand em { color: var(--cyan); font-style: normal; }
+    .top-copy { flex: 1; }
+    .top-copy h1 { font-size: 14px; margin: 0 0 4px; font-weight: 600; }
+    .top-copy p { margin: 0; color: var(--muted); font: 10px DM Mono, monospace; letter-spacing: .08em; }
+    .system-state { color: #9aa5b5; display: flex; align-items: center; gap: 9px; margin-right: 23px; font: 10px DM Mono, monospace; letter-spacing: .08em; }
+    .system-state i { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 10px var(--lime); }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: linear-gradient(145deg,#3a4858,#10141e); display: grid; place-items: center; font-size: 10px; }
+
+    .sidebar { grid-column: 1; grid-row: 2; border-right: 1px solid var(--line); padding: 24px 16px; display: flex; flex-direction: column; background: rgba(9,13,23,.44); z-index: 10; }
+    .nav-label { color: #4e596b; font: 9px DM Mono, monospace; letter-spacing: .18em; padding: 0 10px 10px; }
+    .nav { display: grid; gap: 4px; }
+    .nav-btn { border: 0; background: transparent; border-radius: 8px; display: flex; align-items: center; gap: 11px; padding: 10px; color: #758095; cursor: pointer; text-align: left; font-size: 12px; transition: .2s; }
+    .nav-btn svg { width: 16px; height: 16px; stroke-width: 1.5; }
+    .nav-btn span:last-child { margin-left: auto; font: 9px DM Mono; color: #596476; }
+    .nav-btn:hover { color: #cbd5df; background: rgba(255,255,255,.03); }
+    .nav-btn.active { color: var(--text); background: linear-gradient(90deg, rgba(85,233,238,.11), rgba(85,233,238,.025)); box-shadow: inset 2px 0 var(--cyan); }
+    .nav-btn.active svg { color: var(--cyan); }
+    .side-line { height: 1px; background: var(--line); margin: 20px 8px; }
+    .focus-card { margin: auto 4px 0; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.018); }
+    .focus-card header { display: flex; align-items: center; justify-content: space-between; color: #727d8f; font: 9px DM Mono; letter-spacing: .12em; }
+    .focus-card strong { display: block; margin-top: 13px; font-size: 18px; }
+    .focus-card p { color: #606b7c; font-size: 10px; margin: 5px 0 12px; }
+    .meter { height: 3px; border-radius: 5px; background: #1c2432; overflow: hidden; }
+    .meter span { display: block; height: 100%; width: 68%; background: linear-gradient(90deg,var(--cyan),var(--violet)); box-shadow: 0 0 9px var(--cyan); }
+
+    .workspace { grid-column: 2; grid-row: 2; min-width: 0; position: relative; overflow: hidden; }
+    .workspace::before { content: ""; position: absolute; inset: 0; opacity: .22; background-image: linear-gradient(rgba(106,145,170,.08) 1px, transparent 1px), linear-gradient(90deg,rgba(106,145,170,.08) 1px,transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(circle at center, black, transparent 70%); }
+    .workspace-head { position: absolute; z-index: 8; inset: 22px 25px auto 28px; display: flex; justify-content: space-between; pointer-events: none; }
+    .eyebrow { color: var(--cyan); font: 9px DM Mono; letter-spacing: .16em; }
+    .workspace-head h2 { margin: 8px 0 4px; font-size: 23px; letter-spacing: -.04em; }
+    .workspace-head p { margin: 0; color: #657184; font-size: 11px; }
+    .view-tools { display: flex; gap: 6px; pointer-events: auto; }
+    .icon-btn { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 7px; border: 1px solid var(--line); background: rgba(12,17,28,.75); cursor: pointer; color: #7d899c; }
+    .icon-btn:hover, .icon-btn.active { color: var(--cyan); border-color: rgba(85,233,238,.35); }
+    .icon-btn svg { width: 14px; height: 14px; }
+    .graph { position: absolute; inset: 0; }
+    #links { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    #links line { stroke-width: 1; vector-effect: non-scaling-stroke; }
+    .relation-label { font: 8px DM Mono; fill: #526075; letter-spacing: .08em; }
+
+    .task-node { --size: 100px; --node: var(--cyan); position: absolute; width: var(--size); height: var(--size); transform: translate(-50%,-50%); border: 0; border-radius: 50%; cursor: pointer; display: grid; place-items: center; text-align: center; color: var(--text); background: transparent; filter: drop-shadow(0 10px 22px rgba(0,0,0,.34)); animation: drift var(--speed, 7s) ease-in-out infinite alternate; z-index: 3; }
+    .task-node::before { content:""; position:absolute; inset: 0; border-radius:50%; border: 1px solid color-mix(in srgb, var(--node), transparent 54%); background: radial-gradient(circle at 35% 25%, color-mix(in srgb, var(--node), white 25%), color-mix(in srgb,var(--node),#111827 68%) 25%, rgba(12,18,31,.88) 64%, rgba(6,9,16,.97)); box-shadow: inset -14px -16px 28px rgba(0,0,0,.52), inset 8px 8px 22px color-mix(in srgb,var(--node),transparent 83%), 0 0 0 7px color-mix(in srgb,var(--node),transparent 96%), 0 0 33px color-mix(in srgb,var(--node),transparent 82%); transition: .25s; }
+    .task-node::after { content:""; position:absolute; width: 18%; height: 10%; top: 17%; left: 25%; transform: rotate(-25deg); border-radius: 50%; background: rgba(255,255,255,.5); filter: blur(4px); }
+    .task-node:hover::before, .task-node.selected::before { border-color: var(--node); box-shadow: inset -14px -16px 28px rgba(0,0,0,.4), inset 8px 8px 22px color-mix(in srgb,var(--node),transparent 72%), 0 0 0 8px color-mix(in srgb,var(--node),transparent 92%), 0 0 42px color-mix(in srgb,var(--node),transparent 62%); }
+    .task-node.selected { z-index: 5; }
+    .task-node.done { opacity: .42; filter: grayscale(.6); }
+    .node-content { position: relative; z-index: 2; width: 72%; }
+    .node-content b { display:block; font-size: clamp(9px,1vw,12px); line-height:1.35; font-weight:600; text-shadow:0 2px 8px #000; }
+    .node-content small { display:block; color: color-mix(in srgb,var(--node),white 20%); font: 7px DM Mono; letter-spacing:.1em; margin-bottom:5px; }
+    .node-progress { width: 65%; height: 2px; margin: 7px auto 0; background: rgba(255,255,255,.12); }
+    .node-progress i { display:block; height:100%; background:var(--node); box-shadow:0 0 5px var(--node); }
+    @keyframes drift { from { margin-top:-5px; margin-left:-3px; } to { margin-top:8px; margin-left:5px; } }
+    .legend { position:absolute; bottom:18px; left:24px; display:flex; gap:17px; color:#606c7e; font:8px DM Mono; z-index:8; }
+    .legend span { display:flex; align-items:center; gap:6px; }
+    .legend i { width:13px; height:1px; display:block; }
+    .zoom-note { position:absolute; bottom:18px; right:22px; color:#414d60; font:8px DM Mono; z-index:8; }
+
+    .details { grid-column: 3; grid-row: 2; border-left: 1px solid var(--line); background: rgba(9,13,22,.68); padding: 23px 20px; position: relative; z-index: 10; overflow-y: auto; }
+    .details-top { display:flex; justify-content:space-between; align-items:center; }
+    .details-top span { color:#5d6879; font:9px DM Mono; letter-spacing:.14em; }
+    .more { border:0;background:none;color:#5d6879;cursor:pointer;letter-spacing:.12em; }
+    .status-pill { margin-top:27px; display:inline-flex; align-items:center; gap:6px; padding:5px 8px; border-radius:3px; color:var(--cyan); background:rgba(85,233,238,.08); font:8px DM Mono; letter-spacing:.1em; }
+    .status-pill i { width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 7px currentColor; }
+    .details h3 { font-size:21px; line-height:1.3; letter-spacing:-.03em; margin:12px 0 9px; }
+    .description { color:#778396; line-height:1.75; font-size:11px; margin:0 0 21px; }
+    .detail-row { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px; }
+    .data-box { border:1px solid var(--line);border-radius:7px;padding:10px; }
+    .data-box label, .section-label { display:block;color:#566175;font:8px DM Mono;letter-spacing:.12em;margin-bottom:6px; }
+    .data-box strong {font:10px DM Mono;font-weight:500;}
+    .people { display:flex; margin-bottom:22px; }
+    .person { width:28px;height:28px;border-radius:50%;border:2px solid #101522;margin-right:-6px;background:linear-gradient(135deg,#56667c,#1a2130);display:grid;place-items:center;font-size:7px; }
+    .person:last-child { background:#161d2b;color:#718097; }
+    .check-list { display:grid;gap:7px;margin-bottom:23px; }
+    .check { display:flex;gap:9px;align-items:center;color:#8a95a5;font-size:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.035); }
+    .check input { appearance:none;width:13px;height:13px;border:1px solid #435064;border-radius:3px;display:grid;place-items:center;margin:0; }
+    .check input:checked { background:var(--cyan);border-color:var(--cyan); }
+    .check input:checked::after { content:'✓';color:#071015;font-size:9px;font-weight:bold; }
+    .check:has(input:checked) span { text-decoration:line-through;color:#566071; }
+    .relation-list { display:grid;gap:8px;margin-bottom:22px; }
+    .relation { border:1px solid var(--line);border-radius:7px;padding:9px 10px;display:flex;align-items:center;gap:9px; }
+    .relation i { width:7px;height:7px;border-radius:50%;background:var(--dot);box-shadow:0 0 8px var(--dot); }
+    .relation div { flex:1; }
+    .relation b { display:block;font-size:9px;margin-bottom:3px; }
+    .relation small { color:#5d687a;font:7px DM Mono; }
+    .complete-btn { width:100%;border:1px solid rgba(85,233,238,.3);background:rgba(85,233,238,.08);color:var(--cyan);border-radius:7px;padding:11px;cursor:pointer;font-size:10px;letter-spacing:.08em; }
+    .complete-btn:hover { background:rgba(85,233,238,.15); }
+
+    .fab { position:fixed;right:327px;bottom:46px;z-index:30;width:46px;height:46px;border-radius:50%;border:1px solid rgba(85,233,238,.5);background:#111d28;color:var(--cyan);font-size:24px;font-weight:300;cursor:pointer;box-shadow:0 0 28px rgba(85,233,238,.17); }
+    dialog { width:min(430px,calc(100% - 30px));border:1px solid rgba(85,233,238,.24);border-radius:12px;background:#0d1320;color:var(--text);padding:0;box-shadow:0 30px 90px #000; }
+    dialog::backdrop { background:rgba(2,5,10,.76);backdrop-filter:blur(5px); }
+    .modal { padding:24px; }
+    .modal header { display:flex;justify-content:space-between;align-items:center;margin-bottom:22px; }
+    .modal h3 { margin:0;font-size:17px; }
+    .close {border:0;background:none;color:#778396;cursor:pointer;font-size:20px;}
+    .field { display:grid;gap:7px;margin-bottom:14px; }
+    .field label {color:#697487;font:9px DM Mono;letter-spacing:.08em;}
+    .field input,.field select {width:100%;border:1px solid var(--line);background:#090e18;color:var(--text);border-radius:7px;padding:11px;outline:none;font-size:12px;}
+    .field input:focus,.field select:focus {border-color:rgba(85,233,238,.5);}
+    .modal-actions {display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
+    .modal-actions button {border:1px solid var(--line);border-radius:7px;background:transparent;padding:9px 15px;cursor:pointer;font-size:10px;}
+    .modal-actions .primary {background:var(--cyan);border-color:var(--cyan);color:#061014;font-weight:700;}
+
+    @media (max-width: 1050px) { .app { grid-template-columns:72px 1fr 280px; } .brand {width:50px}.brand span,.nav-btn b,.nav-btn span:last-child,.nav-label,.focus-card {display:none}.nav-btn{justify-content:center}.sidebar{padding-inline:10px}.fab{right:302px} }
+    @media (max-width: 760px) { body{overflow:auto}.app{height:auto;min-height:100vh;display:block}.topbar{height:62px;position:sticky;top:0}.brand{width:auto}.brand span{display:inline}.top-copy,.system-state{display:none}.avatar{margin-left:auto}.sidebar{display:none}.workspace{height:calc(100vh - 62px);min-height:600px}.details{display:none}.fab{right:20px;bottom:22px}.workspace-head{inset:18px}.task-node{--size:84px!important}.legend{flex-wrap:wrap;width:230px}.zoom-note{display:none} }
+  </style>
 </head>
 <body>
-  <h1>ユーザー一覧</h1>
-  <ul>
-    <% users.forEach(user => { %>
-      <li><%= user.name %> - <%= user.age ? user.age + ' 歳' : '年齢未設定' %></li>
-    <% }) %>
-  </ul>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark"></div><span>NEX<em>US</em></span></div>
+      <div class="top-copy"><h1>Spatial Task System</h1><p>WORKSPACE / PRODUCT LAUNCH · JUL 21, 2026</p></div>
+      <div class="system-state"><i></i>ALL SYSTEMS SYNCED</div>
+      <div class="avatar">YK</div>
+    </header>
 
-  <h2>ユーザー追加</h2>
-  <form action="/users" method="post">
-    <input type="text" name="name" placeholder="名前を入力" required>
-    <input type="number" name="age" placeholder="年齢を入力">
-    <button type="submit">追加</button>
-  </form>
+    <aside class="sidebar">
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="nav">
+        <button class="nav-btn active" data-filter="all"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><path d="M3 12h6m6 0h6M12 3v6m0 6v6"/></svg><b>Nexus Map</b><span>08</span></button>
+        <button class="nav-btn" data-filter="today"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg><b>Today</b><span>04</span></button>
+        <button class="nav-btn" data-filter="priority"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3 3.8 7.5v9L12 21l8.2-4.5v-9L12 3Z"/><path d="M12 8v5m0 3h.01"/></svg><b>Priority</b><span>03</span></button>
+        <button class="nav-btn" data-filter="done"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><b>Completed</b><span id="doneCount">01</span></button>
+      </nav>
+      <div class="side-line"></div>
+      <div class="nav-label">COLLECTIONS</div>
+      <nav class="nav">
+        <button class="nav-btn" data-filter="product"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>Product</b><span>05</span></button>
+        <button class="nav-btn" data-filter="research"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>Research</b><span>02</span></button>
+        <button class="nav-btn" data-filter="personal"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>Personal</b><span>01</span></button>
+      </nav>
+      <section class="focus-card"><header>WEEKLY FLOW <span>68%</span></header><strong>24 / 35</strong><p>tasks resolved this cycle</p><div class="meter"><span></span></div></section>
+    </aside>
+
+    <section class="workspace">
+      <div class="workspace-head">
+        <div><div class="eyebrow">LIVE CONSTELLATION</div><h2 id="viewTitle">Project Nexus</h2><p id="viewSubtitle">8 tasks · 11 active relations</p></div>
+        <div class="view-tools">
+          <button class="icon-btn active" title="Relation view"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="10" cy="18" r="2"/><path d="m8 7 8 1M7 8l2 8m3 1 5-7"/></svg></button>
+          <button class="icon-btn" id="recenter" title="Re-center"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg></button>
+        </div>
+      </div>
+      <div class="graph" id="graph"><svg id="links"></svg></div>
+      <div class="legend"><span><i style="background:var(--cyan)"></i>BLOCKS</span><span><i style="background:var(--violet)"></i>RELATED</span><span><i style="background:var(--lime)"></i>SUPPORTS</span></div>
+      <div class="zoom-note">SELECT A NODE TO INSPECT · LIVE DATA</div>
+    </section>
+
+    <aside class="details" id="details">
+      <div class="details-top"><span>NODE INSPECTOR</span><button class="more">•••</button></div>
+      <div class="status-pill"><i></i><span id="detailStatus">IN PROGRESS</span></div>
+      <h3 id="detailTitle">Launch campaign strategy</h3>
+      <p class="description" id="detailDescription">Define the launch narrative, key channels, and execution timeline for the next product release.</p>
+      <div class="detail-row"><div class="data-box"><label>DEADLINE</label><strong id="detailDue">JUL 25 · 4D</strong></div><div class="data-box"><label>PRIORITY</label><strong id="detailPriority">● HIGH</strong></div></div>
+      <span class="section-label">COLLABORATORS</span><div class="people"><div class="person">YK</div><div class="person">MN</div><div class="person">AR</div><div class="person">+2</div></div>
+      <span class="section-label">SUBTASKS · <span id="subProgress">2/4</span></span>
+      <div class="check-list" id="checkList"></div>
+      <span class="section-label">CONNECTED NODES</span><div class="relation-list" id="relationList"></div>
+      <button class="complete-btn" id="completeBtn">MARK AS COMPLETE</button>
+    </aside>
+  </main>
+  <button class="fab" id="addBtn" title="Add task">＋</button>
+
+  <dialog id="taskDialog">
+    <form class="modal" id="taskForm" method="dialog">
+      <header><h3>Create new node</h3><button class="close" id="closeDialog" type="button">×</button></header>
+      <div class="field"><label>TASK NAME</label><input name="title" placeholder="What needs to happen?" required maxlength="42"></div>
+      <div class="field"><label>COLLECTION</label><select name="category"><option value="product">Product</option><option value="research">Research</option><option value="personal">Personal</option></select></div>
+      <div class="field"><label>CONNECT TO</label><select name="parent" id="parentSelect"></select></div>
+      <div class="field"><label>PRIORITY</label><select name="priority"><option>HIGH</option><option selected>MEDIUM</option><option>LOW</option></select></div>
+      <div class="modal-actions"><button id="cancelDialog" type="button">CANCEL</button><button class="primary" type="submit">CREATE NODE</button></div>
+    </form>
+  </dialog>
+
+  <script>
+    const palette = { cyan:'#55e9ee', violet:'#a881ff', lime:'#b8f26d', orange:'#ffad66', pink:'#ff72b6' };
+    const seedTasks = [
+      {id:'launch',title:'Launch campaign strategy',short:'Launch strategy',category:'product',x:50,y:45,size:132,color:'cyan',progress:58,priority:'HIGH',due:'JUL 25 · 4D',today:true,description:'Define the launch narrative, key channels, and execution timeline for the next product release.',checks:[['Define narrative',true],['Map launch channels',true],['Lock campaign timeline',false],['Share with stakeholders',false]]},
+      {id:'research',title:'User research synthesis',short:'Research synthesis',category:'research',x:27,y:30,size:105,color:'violet',progress:76,priority:'HIGH',due:'JUL 22 · 1D',today:true,description:'Turn recent interview signals into clear product opportunities and decisions.',checks:[['Tag interview notes',true],['Group insights',true],['Publish findings',false]]},
+      {id:'prototype',title:'Interactive prototype',short:'Prototype V2',category:'product',x:73,y:27,size:112,color:'lime',progress:42,priority:'HIGH',due:'JUL 24 · 3D',today:true,description:'Build a high-fidelity interaction model for the core onboarding experience.',checks:[['Core flow',true],['Motion states',false],['Device test',false]]},
+      {id:'metrics',title:'Success metrics',short:'Success metrics',category:'research',x:77,y:57,size:92,color:'orange',progress:30,priority:'MEDIUM',due:'JUL 27 · 6D',today:false,description:'Define measurable outcomes and instrumentation for launch week.',checks:[['Choose north star',true],['Set baselines',false]]},
+      {id:'design',title:'Visual system polish',short:'Visual polish',category:'product',x:31,y:62,size:98,color:'pink',progress:65,priority:'MEDIUM',due:'JUL 23 · 2D',today:true,description:'Refine the visual system and prepare production-ready UI specifications.',checks:[['Color audit',true],['Type scale',true],['Handoff',false]]},
+      {id:'brief',title:'Stakeholder brief',short:'Stakeholder brief',category:'product',x:52,y:74,size:84,color:'cyan',progress:90,priority:'LOW',due:'JUL 21 · TODAY',today:false,description:'Condense current strategy and open decisions into a concise leadership brief.',checks:[['Write draft',true],['Review',true],['Distribute',false]]},
+      {id:'qa',title:'Release QA plan',short:'QA plan',category:'product',x:17,y:50,size:77,color:'lime',progress:100,priority:'LOW',due:'DONE',today:false,done:true,description:'Test matrix for launch-critical flows across supported environments.',checks:[['Matrix',true],['Run suite',true]]},
+      {id:'retro',title:'Team retrospective',short:'Retrospective',category:'personal',x:67,y:78,size:73,color:'violet',progress:18,priority:'LOW',due:'JUL 29 · 8D',today:false,description:'Capture what helped the team move quickly and what should change next cycle.',checks:[['Collect notes',false],['Facilitate',false]]}
+    ];
+    const seedLinks = [
+      ['research','launch','blocks','cyan'],['launch','prototype','related','violet'],['launch','design','blocks','cyan'],['prototype','metrics','supports','lime'],['design','brief','supports','lime'],['launch','metrics','related','violet'],['launch','brief','supports','lime'],['qa','design','blocks','cyan'],['brief','retro','related','violet'],['prototype','research','related','violet'],['metrics','retro','supports','lime']
+    ];
+    let tasks;
+    try { tasks = JSON.parse(localStorage.getItem('nexus-tasks')) || seedTasks; } catch { tasks = seedTasks; }
+    let links = [...seedLinks], selectedId = 'launch', currentFilter = 'all';
+    const graph = document.getElementById('graph'), svg = document.getElementById('links');
+
+    function save(){ localStorage.setItem('nexus-tasks',JSON.stringify(tasks)); }
+    function visible(t){ if(currentFilter==='all')return true;if(currentFilter==='done')return t.done;if(currentFilter==='priority')return t.priority==='HIGH'&&!t.done;if(currentFilter==='today')return t.today&&!t.done;return t.category===currentFilter&&!t.done; }
+    function render(){
+      graph.querySelectorAll('.task-node').forEach(n=>n.remove()); svg.innerHTML='';
+      tasks.forEach((t,i)=>{
+        if(!visible(t)) return;
+        const node=document.createElement('button'); node.className='task-node'+(t.id===selectedId?' selected':'')+(t.done?' done':''); node.dataset.id=t.id;
+        node.style.cssText=`left:${t.x}%;top:${t.y}%;--size:${t.size}px;--node:${palette[t.color]};--speed:${6+(i%5)}s;animation-delay:${-i*.8}s`;
+        node.innerHTML=`<span class="node-content"><small>${t.category.toUpperCase()}</small><b>${t.short||t.title}</b><span class="node-progress"><i style="width:${t.progress}%"></i></span></span>`;
+        node.onclick=()=>selectTask(t.id); graph.appendChild(node);
+      });
+      requestAnimationFrame(drawLinks); updateCounts();
+    }
+    function drawLinks(){
+      svg.innerHTML=''; const box=graph.getBoundingClientRect();
+      links.forEach(([a,b,type,color])=>{
+        const from=graph.querySelector(`[data-id="${a}"]`),to=graph.querySelector(`[data-id="${b}"]`); if(!from||!to)return;
+        const ar=from.getBoundingClientRect(),br=to.getBoundingClientRect(), x1=ar.left+ar.width/2-box.left,y1=ar.top+ar.height/2-box.top,x2=br.left+br.width/2-box.left,y2=br.top+br.height/2-box.top;
+        const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',x1);line.setAttribute('y1',y1);line.setAttribute('x2',x2);line.setAttribute('y2',y2);line.setAttribute('stroke',palette[color]);line.setAttribute('opacity',selectedId===a||selectedId===b?'.58':'.19'); if(type==='related')line.setAttribute('stroke-dasharray','4 5');svg.appendChild(line);
+      });
+    }
+    function selectTask(id){ selectedId=id; const t=tasks.find(x=>x.id===id); if(!t)return;
+      document.querySelectorAll('.task-node').forEach(n=>n.classList.toggle('selected',n.dataset.id===id));
+      document.getElementById('detailTitle').textContent=t.title; document.getElementById('detailDescription').textContent=t.description;
+      document.getElementById('detailDue').textContent=t.due; document.getElementById('detailPriority').textContent='● '+t.priority;
+      document.getElementById('detailStatus').textContent=t.done?'COMPLETED':'IN PROGRESS'; document.querySelector('.status-pill').style.color=t.done?'var(--lime)':'var(--cyan)';
+      const checks=document.getElementById('checkList'); checks.innerHTML=''; (t.checks||[]).forEach((c,i)=>{const l=document.createElement('label');l.className='check';l.innerHTML=`<input type="checkbox" ${c[1]?'checked':''}><span>${c[0]}</span>`;l.querySelector('input').onchange=e=>{t.checks[i][1]=e.target.checked;updateCheckProgress(t);save();};checks.appendChild(l)}); updateCheckProgress(t);
+      const rel=document.getElementById('relationList');rel.innerHTML='';links.filter(l=>l[0]===id||l[1]===id).forEach(l=>{const other=tasks.find(x=>x.id===(l[0]===id?l[1]:l[0]));if(!other)return;const el=document.createElement('div');el.className='relation';el.style.setProperty('--dot',palette[l[3]]);el.innerHTML=`<i></i><div><b>${other.short||other.title}</b><small>${l[2].toUpperCase()}</small></div>`;el.onclick=()=>selectTask(other.id);rel.appendChild(el)});
+      document.getElementById('completeBtn').textContent=t.done?'REOPEN TASK':'MARK AS COMPLETE'; drawLinks();
+    }
+    function updateCheckProgress(t){const done=(t.checks||[]).filter(c=>c[1]).length;document.getElementById('subProgress').textContent=`${done}/${(t.checks||[]).length}`;}
+    function updateCounts(){const visibleCount=tasks.filter(visible).length;document.getElementById('viewSubtitle').textContent=`${visibleCount} tasks · ${links.filter(l=>tasks.some(t=>t.id===l[0]&&visible(t))&&tasks.some(t=>t.id===l[1]&&visible(t))).length} active relations`;document.getElementById('doneCount').textContent=String(tasks.filter(t=>t.done).length).padStart(2,'0');}
+    document.querySelectorAll('.nav-btn[data-filter]').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentFilter=btn.dataset.filter;document.getElementById('viewTitle').textContent=btn.querySelector('b')?.textContent||'Project Nexus';render();});
+    document.getElementById('completeBtn').onclick=()=>{const t=tasks.find(x=>x.id===selectedId);if(!t)return;t.done=!t.done;t.progress=t.done?100:Math.min(t.progress,90);save();render();selectTask(t.id);};
+    document.getElementById('recenter').onclick=()=>{currentFilter='all';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));document.getElementById('viewTitle').textContent='Project Nexus';render();};
+    const dialog=document.getElementById('taskDialog'),form=document.getElementById('taskForm');
+    document.getElementById('closeDialog').onclick=()=>dialog.close(); document.getElementById('cancelDialog').onclick=()=>dialog.close();
+    document.getElementById('addBtn').onclick=()=>{const s=document.getElementById('parentSelect');s.innerHTML=tasks.filter(t=>!t.done).map(t=>`<option value="${t.id}">${t.title}</option>`).join('');dialog.showModal();};
+    form.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(form),title=String(fd.get('title')).trim();if(!title)return;const id='task-'+Date.now(),colors=['cyan','violet','lime','orange','pink'];tasks.push({id,title,short:title,category:fd.get('category'),priority:fd.get('priority'),x:25+Math.random()*50,y:27+Math.random()*52,size:82,color:colors[tasks.length%colors.length],progress:0,due:'NEW NODE',description:'Newly created task node. Add context and break it into smaller steps.',checks:[['Define next action',false]],today:false});links.push([String(fd.get('parent')),id,'related','violet']);selectedId=id;currentFilter='all';save();dialog.close();form.reset();render();selectTask(id);});
+    window.addEventListener('resize',drawLinks); setInterval(drawLinks,120);
+    render();selectTask(selectedId);
+  </script>
 </body>
 </html>
