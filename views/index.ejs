@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#070b15">
-  <title>NEXUS — Spatial Task System</title>
+  <title>NEXUS — 空間タスク管理</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -151,89 +151,92 @@
   <main class="app">
     <header class="topbar">
       <div class="brand"><div class="brand-mark"></div><span>NEX<em>US</em></span></div>
-      <div class="top-copy"><h1>Spatial Task System</h1><p>WORKSPACE / PRODUCT LAUNCH · JUL 21, 2026</p></div>
-      <div class="system-state"><i></i>ALL SYSTEMS SYNCED</div>
+      <div class="top-copy"><h1>空間タスク管理システム</h1><p>ワークスペース / プロダクトローンチ · 2026年7月21日</p></div>
+      <div class="system-state"><i></i>すべて同期済み</div>
       <div class="avatar">YK</div>
     </header>
 
     <aside class="sidebar">
-      <div class="nav-label">WORKSPACE</div>
+      <div class="nav-label">ワークスペース</div>
       <nav class="nav">
-        <button class="nav-btn active" data-filter="all"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><path d="M3 12h6m6 0h6M12 3v6m0 6v6"/></svg><b>Nexus Map</b><span>08</span></button>
-        <button class="nav-btn" data-filter="today"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg><b>Today</b><span>04</span></button>
-        <button class="nav-btn" data-filter="priority"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3 3.8 7.5v9L12 21l8.2-4.5v-9L12 3Z"/><path d="M12 8v5m0 3h.01"/></svg><b>Priority</b><span>03</span></button>
-        <button class="nav-btn" data-filter="done"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><b>Completed</b><span id="doneCount">01</span></button>
+        <button class="nav-btn active" data-filter="all"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><path d="M3 12h6m6 0h6M12 3v6m0 6v6"/></svg><b>全体マップ</b><span>08</span></button>
+        <button class="nav-btn" data-filter="today"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg><b>今日のタスク</b><span>04</span></button>
+        <button class="nav-btn" data-filter="priority"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 3 3.8 7.5v9L12 21l8.2-4.5v-9L12 3Z"/><path d="M12 8v5m0 3h.01"/></svg><b>優先タスク</b><span>03</span></button>
+        <button class="nav-btn" data-filter="done"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><b>完了済み</b><span id="doneCount">01</span></button>
       </nav>
       <div class="side-line"></div>
-      <div class="nav-label">COLLECTIONS</div>
+      <div class="nav-label">カテゴリー</div>
       <nav class="nav">
-        <button class="nav-btn" data-filter="product"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>Product</b><span>05</span></button>
-        <button class="nav-btn" data-filter="research"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>Research</b><span>02</span></button>
-        <button class="nav-btn" data-filter="personal"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>Personal</b><span>01</span></button>
+        <button class="nav-btn" data-filter="product"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>プロダクト</b><span>05</span></button>
+        <button class="nav-btn" data-filter="research"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>リサーチ</b><span>02</span></button>
+        <button class="nav-btn" data-filter="personal"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg><b>個人</b><span>01</span></button>
       </nav>
-      <section class="focus-card"><header>WEEKLY FLOW <span>68%</span></header><strong>24 / 35</strong><p>tasks resolved this cycle</p><div class="meter"><span></span></div></section>
+      <section class="focus-card"><header>今週の進捗 <span>68%</span></header><strong>24 / 35</strong><p>今週完了したタスク</p><div class="meter"><span></span></div></section>
     </aside>
 
     <section class="workspace">
       <div class="workspace-head">
-        <div><div class="eyebrow">LIVE CONSTELLATION</div><h2 id="viewTitle">Project Nexus</h2><p id="viewSubtitle">8 tasks · 11 active relations</p></div>
+        <div><div class="eyebrow">ライブ・コンステレーション</div><h2 id="viewTitle">プロジェクト・ネクサス</h2><p id="viewSubtitle">8件のタスク · 11件のつながり</p></div>
         <div class="view-tools">
-          <button class="icon-btn active" title="Relation view"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="10" cy="18" r="2"/><path d="m8 7 8 1M7 8l2 8m3 1 5-7"/></svg></button>
-          <button class="icon-btn" id="recenter" title="Re-center"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg></button>
+          <button class="icon-btn active" title="関係表示"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="10" cy="18" r="2"/><path d="m8 7 8 1M7 8l2 8m3 1 5-7"/></svg></button>
+          <button class="icon-btn" id="recenter" title="表示をリセット"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg></button>
         </div>
       </div>
       <div class="graph" id="graph"><svg id="links"></svg></div>
-      <div class="legend"><span><i style="background:var(--cyan)"></i>BLOCKS</span><span><i style="background:var(--violet)"></i>RELATED</span><span><i style="background:var(--lime)"></i>SUPPORTS</span></div>
-      <div class="zoom-note">SELECT A NODE TO INSPECT · LIVE DATA</div>
+      <div class="legend"><span><i style="background:var(--cyan)"></i>先行タスク</span><span><i style="background:var(--violet)"></i>関連</span><span><i style="background:var(--lime)"></i>サポート</span></div>
+      <div class="zoom-note">球を選択すると詳細を表示 · リアルタイムデータ</div>
     </section>
 
     <aside class="details" id="details">
-      <div class="details-top"><span>NODE INSPECTOR</span><button class="more">•••</button></div>
-      <div class="status-pill"><i></i><span id="detailStatus">IN PROGRESS</span></div>
-      <h3 id="detailTitle">Launch campaign strategy</h3>
-      <p class="description" id="detailDescription">Define the launch narrative, key channels, and execution timeline for the next product release.</p>
-      <div class="detail-row"><div class="data-box"><label>DEADLINE</label><strong id="detailDue">JUL 25 · 4D</strong></div><div class="data-box"><label>PRIORITY</label><strong id="detailPriority">● HIGH</strong></div></div>
-      <span class="section-label">COLLABORATORS</span><div class="people"><div class="person">YK</div><div class="person">MN</div><div class="person">AR</div><div class="person">+2</div></div>
-      <span class="section-label">SUBTASKS · <span id="subProgress">2/4</span></span>
+      <div class="details-top"><span>タスク詳細</span><button class="more">•••</button></div>
+      <div class="status-pill"><i></i><span id="detailStatus">進行中</span></div>
+      <h3 id="detailTitle">ローンチ戦略の策定</h3>
+      <p class="description" id="detailDescription">次回リリースに向けたメッセージ、主要チャネル、実行スケジュールを設計します。</p>
+      <div class="detail-row"><div class="data-box"><label>期限</label><strong id="detailDue">7月25日 · あと4日</strong></div><div class="data-box"><label>優先度</label><strong id="detailPriority">● 高</strong></div></div>
+      <span class="section-label">担当メンバー</span><div class="people"><div class="person">YK</div><div class="person">MN</div><div class="person">AR</div><div class="person">+2</div></div>
+      <span class="section-label">サブタスク · <span id="subProgress">2/4</span></span>
       <div class="check-list" id="checkList"></div>
-      <span class="section-label">CONNECTED NODES</span><div class="relation-list" id="relationList"></div>
-      <button class="complete-btn" id="completeBtn">MARK AS COMPLETE</button>
+      <span class="section-label">関連するタスク</span><div class="relation-list" id="relationList"></div>
+      <button class="complete-btn" id="completeBtn">タスクを完了する</button>
     </aside>
   </main>
-  <button class="fab" id="addBtn" title="Add task">＋</button>
+  <button class="fab" id="addBtn" title="タスクを追加">＋</button>
 
   <dialog id="taskDialog">
     <form class="modal" id="taskForm" method="dialog">
-      <header><h3>Create new node</h3><button class="close" id="closeDialog" type="button">×</button></header>
-      <div class="field"><label>TASK NAME</label><input name="title" placeholder="What needs to happen?" required maxlength="42"></div>
-      <div class="field"><label>COLLECTION</label><select name="category"><option value="product">Product</option><option value="research">Research</option><option value="personal">Personal</option></select></div>
-      <div class="field"><label>CONNECT TO</label><select name="parent" id="parentSelect"></select></div>
-      <div class="field"><label>PRIORITY</label><select name="priority"><option>HIGH</option><option selected>MEDIUM</option><option>LOW</option></select></div>
-      <div class="modal-actions"><button id="cancelDialog" type="button">CANCEL</button><button class="primary" type="submit">CREATE NODE</button></div>
+      <header><h3>新しいタスクを追加</h3><button class="close" id="closeDialog" type="button">×</button></header>
+      <div class="field"><label>タスク名</label><input name="title" placeholder="何をする必要がありますか？" required maxlength="42"></div>
+      <div class="field"><label>カテゴリー</label><select name="category"><option value="product">プロダクト</option><option value="research">リサーチ</option><option value="personal">個人</option></select></div>
+      <div class="field"><label>接続するタスク</label><select name="parent" id="parentSelect"></select></div>
+      <div class="field"><label>優先度</label><select name="priority"><option value="HIGH">高</option><option value="MEDIUM" selected>中</option><option value="LOW">低</option></select></div>
+      <div class="modal-actions"><button id="cancelDialog" type="button">キャンセル</button><button class="primary" type="submit">タスクを追加</button></div>
     </form>
   </dialog>
 
   <script>
     const palette = { cyan:'#55e9ee', violet:'#a881ff', lime:'#b8f26d', orange:'#ffad66', pink:'#ff72b6' };
+    const categoryNames = { product:'プロダクト', research:'リサーチ', personal:'個人' };
+    const priorityNames = { HIGH:'高', MEDIUM:'中', LOW:'低' };
+    const relationNames = { blocks:'先行タスク', related:'関連', supports:'サポート' };
     const seedTasks = [
-      {id:'launch',title:'Launch campaign strategy',short:'Launch strategy',category:'product',x:50,y:45,size:132,color:'cyan',progress:58,priority:'HIGH',due:'JUL 25 · 4D',today:true,description:'Define the launch narrative, key channels, and execution timeline for the next product release.',checks:[['Define narrative',true],['Map launch channels',true],['Lock campaign timeline',false],['Share with stakeholders',false]]},
-      {id:'research',title:'User research synthesis',short:'Research synthesis',category:'research',x:27,y:30,size:105,color:'violet',progress:76,priority:'HIGH',due:'JUL 22 · 1D',today:true,description:'Turn recent interview signals into clear product opportunities and decisions.',checks:[['Tag interview notes',true],['Group insights',true],['Publish findings',false]]},
-      {id:'prototype',title:'Interactive prototype',short:'Prototype V2',category:'product',x:73,y:27,size:112,color:'lime',progress:42,priority:'HIGH',due:'JUL 24 · 3D',today:true,description:'Build a high-fidelity interaction model for the core onboarding experience.',checks:[['Core flow',true],['Motion states',false],['Device test',false]]},
-      {id:'metrics',title:'Success metrics',short:'Success metrics',category:'research',x:77,y:57,size:92,color:'orange',progress:30,priority:'MEDIUM',due:'JUL 27 · 6D',today:false,description:'Define measurable outcomes and instrumentation for launch week.',checks:[['Choose north star',true],['Set baselines',false]]},
-      {id:'design',title:'Visual system polish',short:'Visual polish',category:'product',x:31,y:62,size:98,color:'pink',progress:65,priority:'MEDIUM',due:'JUL 23 · 2D',today:true,description:'Refine the visual system and prepare production-ready UI specifications.',checks:[['Color audit',true],['Type scale',true],['Handoff',false]]},
-      {id:'brief',title:'Stakeholder brief',short:'Stakeholder brief',category:'product',x:52,y:74,size:84,color:'cyan',progress:90,priority:'LOW',due:'JUL 21 · TODAY',today:false,description:'Condense current strategy and open decisions into a concise leadership brief.',checks:[['Write draft',true],['Review',true],['Distribute',false]]},
-      {id:'qa',title:'Release QA plan',short:'QA plan',category:'product',x:17,y:50,size:77,color:'lime',progress:100,priority:'LOW',due:'DONE',today:false,done:true,description:'Test matrix for launch-critical flows across supported environments.',checks:[['Matrix',true],['Run suite',true]]},
-      {id:'retro',title:'Team retrospective',short:'Retrospective',category:'personal',x:67,y:78,size:73,color:'violet',progress:18,priority:'LOW',due:'JUL 29 · 8D',today:false,description:'Capture what helped the team move quickly and what should change next cycle.',checks:[['Collect notes',false],['Facilitate',false]]}
+      {id:'launch',title:'ローンチ戦略の策定',short:'ローンチ戦略',category:'product',x:50,y:45,size:132,color:'cyan',progress:58,priority:'HIGH',due:'7月25日 · あと4日',today:true,description:'次回リリースに向けたメッセージ、主要チャネル、実行スケジュールを設計します。',checks:[['メッセージを定義',true],['配信チャネルを整理',true],['進行日程を確定',false],['関係者へ共有',false]]},
+      {id:'research',title:'ユーザー調査の分析',short:'調査結果の分析',category:'research',x:27,y:30,size:105,color:'violet',progress:76,priority:'HIGH',due:'7月22日 · あと1日',today:true,description:'インタビューで得た情報を整理し、プロダクトの改善機会と判断材料に変換します。',checks:[['インタビューを分類',true],['知見をグループ化',true],['分析結果を公開',false]]},
+      {id:'prototype',title:'操作プロトタイプ',short:'プロトタイプ V2',category:'product',x:73,y:27,size:112,color:'lime',progress:42,priority:'HIGH',due:'7月24日 · あと3日',today:true,description:'オンボーディングの主要体験を確認できる、高精度な操作モデルを制作します。',checks:[['主要フローを作成',true],['動きの状態を追加',false],['実機でテスト',false]]},
+      {id:'metrics',title:'成功指標の設定',short:'成功指標',category:'research',x:77,y:57,size:92,color:'orange',progress:30,priority:'MEDIUM',due:'7月27日 · あと6日',today:false,description:'ローンチ週の成果を判断する指標と計測方法を定義します。',checks:[['最重要指標を選定',true],['基準値を設定',false]]},
+      {id:'design',title:'ビジュアルの仕上げ',short:'UIの仕上げ',category:'product',x:31,y:62,size:98,color:'pink',progress:65,priority:'MEDIUM',due:'7月23日 · あと2日',today:true,description:'ビジュアルシステムを整え、実装に使えるUI仕様を準備します。',checks:[['配色を確認',true],['文字サイズを整理',true],['開発へ引き継ぎ',false]]},
+      {id:'brief',title:'関係者向け資料',short:'共有資料',category:'product',x:52,y:74,size:84,color:'cyan',progress:90,priority:'LOW',due:'7月21日 · 今日',today:false,description:'現在の戦略と未決事項を、意思決定者向けの短い資料にまとめます。',checks:[['初稿を作成',true],['内容を確認',true],['関係者へ配布',false]]},
+      {id:'qa',title:'リリース品質確認',short:'品質確認',category:'product',x:17,y:50,size:77,color:'lime',progress:100,priority:'LOW',due:'完了',today:false,done:true,description:'対応環境ごとに、ローンチに必要な主要機能を確認します。',checks:[['確認項目を作成',true],['テストを実施',true]]},
+      {id:'retro',title:'チーム振り返り',short:'振り返り',category:'personal',x:67,y:78,size:73,color:'violet',progress:18,priority:'LOW',due:'7月29日 · あと8日',today:false,description:'素早く進められた要因と、次のサイクルで改善する点を記録します。',checks:[['意見を集める',false],['振り返りを実施',false]]}
     ];
     const seedLinks = [
       ['research','launch','blocks','cyan'],['launch','prototype','related','violet'],['launch','design','blocks','cyan'],['prototype','metrics','supports','lime'],['design','brief','supports','lime'],['launch','metrics','related','violet'],['launch','brief','supports','lime'],['qa','design','blocks','cyan'],['brief','retro','related','violet'],['prototype','research','related','violet'],['metrics','retro','supports','lime']
     ];
     let tasks;
-    try { tasks = JSON.parse(localStorage.getItem('nexus-tasks')) || seedTasks; } catch { tasks = seedTasks; }
+    try { tasks = JSON.parse(localStorage.getItem('nexus-tasks-ja-v1')) || seedTasks; } catch { tasks = seedTasks; }
     let links = [...seedLinks], selectedId = 'launch', currentFilter = 'all';
     const graph = document.getElementById('graph'), svg = document.getElementById('links');
 
-    function save(){ localStorage.setItem('nexus-tasks',JSON.stringify(tasks)); }
+    function save(){ localStorage.setItem('nexus-tasks-ja-v1',JSON.stringify(tasks)); }
     function visible(t){ if(currentFilter==='all')return true;if(currentFilter==='done')return t.done;if(currentFilter==='priority')return t.priority==='HIGH'&&!t.done;if(currentFilter==='today')return t.today&&!t.done;return t.category===currentFilter&&!t.done; }
     function render(){
       graph.querySelectorAll('.task-node').forEach(n=>n.remove()); svg.innerHTML='';
@@ -241,7 +244,7 @@
         if(!visible(t)) return;
         const node=document.createElement('button'); node.className='task-node'+(t.id===selectedId?' selected':'')+(t.done?' done':''); node.dataset.id=t.id;
         node.style.cssText=`left:${t.x}%;top:${t.y}%;--size:${t.size}px;--node:${palette[t.color]};--speed:${6+(i%5)}s;animation-delay:${-i*.8}s`;
-        node.innerHTML=`<span class="node-content"><small>${t.category.toUpperCase()}</small><b>${t.short||t.title}</b><span class="node-progress"><i style="width:${t.progress}%"></i></span></span>`;
+        node.innerHTML=`<span class="node-content"><small>${categoryNames[t.category]||t.category}</small><b>${t.short||t.title}</b><span class="node-progress"><i style="width:${t.progress}%"></i></span></span>`;
         node.onclick=()=>selectTask(t.id); graph.appendChild(node);
       });
       requestAnimationFrame(drawLinks); updateCounts();
@@ -257,21 +260,21 @@
     function selectTask(id){ selectedId=id; const t=tasks.find(x=>x.id===id); if(!t)return;
       document.querySelectorAll('.task-node').forEach(n=>n.classList.toggle('selected',n.dataset.id===id));
       document.getElementById('detailTitle').textContent=t.title; document.getElementById('detailDescription').textContent=t.description;
-      document.getElementById('detailDue').textContent=t.due; document.getElementById('detailPriority').textContent='● '+t.priority;
-      document.getElementById('detailStatus').textContent=t.done?'COMPLETED':'IN PROGRESS'; document.querySelector('.status-pill').style.color=t.done?'var(--lime)':'var(--cyan)';
+      document.getElementById('detailDue').textContent=t.due; document.getElementById('detailPriority').textContent='● '+(priorityNames[t.priority]||t.priority);
+      document.getElementById('detailStatus').textContent=t.done?'完了':'進行中'; document.querySelector('.status-pill').style.color=t.done?'var(--lime)':'var(--cyan)';
       const checks=document.getElementById('checkList'); checks.innerHTML=''; (t.checks||[]).forEach((c,i)=>{const l=document.createElement('label');l.className='check';l.innerHTML=`<input type="checkbox" ${c[1]?'checked':''}><span>${c[0]}</span>`;l.querySelector('input').onchange=e=>{t.checks[i][1]=e.target.checked;updateCheckProgress(t);save();};checks.appendChild(l)}); updateCheckProgress(t);
-      const rel=document.getElementById('relationList');rel.innerHTML='';links.filter(l=>l[0]===id||l[1]===id).forEach(l=>{const other=tasks.find(x=>x.id===(l[0]===id?l[1]:l[0]));if(!other)return;const el=document.createElement('div');el.className='relation';el.style.setProperty('--dot',palette[l[3]]);el.innerHTML=`<i></i><div><b>${other.short||other.title}</b><small>${l[2].toUpperCase()}</small></div>`;el.onclick=()=>selectTask(other.id);rel.appendChild(el)});
-      document.getElementById('completeBtn').textContent=t.done?'REOPEN TASK':'MARK AS COMPLETE'; drawLinks();
+      const rel=document.getElementById('relationList');rel.innerHTML='';links.filter(l=>l[0]===id||l[1]===id).forEach(l=>{const other=tasks.find(x=>x.id===(l[0]===id?l[1]:l[0]));if(!other)return;const el=document.createElement('div');el.className='relation';el.style.setProperty('--dot',palette[l[3]]);el.innerHTML=`<i></i><div><b>${other.short||other.title}</b><small>${relationNames[l[2]]||l[2]}</small></div>`;el.onclick=()=>selectTask(other.id);rel.appendChild(el)});
+      document.getElementById('completeBtn').textContent=t.done?'タスクを再開する':'タスクを完了する'; drawLinks();
     }
     function updateCheckProgress(t){const done=(t.checks||[]).filter(c=>c[1]).length;document.getElementById('subProgress').textContent=`${done}/${(t.checks||[]).length}`;}
-    function updateCounts(){const visibleCount=tasks.filter(visible).length;document.getElementById('viewSubtitle').textContent=`${visibleCount} tasks · ${links.filter(l=>tasks.some(t=>t.id===l[0]&&visible(t))&&tasks.some(t=>t.id===l[1]&&visible(t))).length} active relations`;document.getElementById('doneCount').textContent=String(tasks.filter(t=>t.done).length).padStart(2,'0');}
-    document.querySelectorAll('.nav-btn[data-filter]').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentFilter=btn.dataset.filter;document.getElementById('viewTitle').textContent=btn.querySelector('b')?.textContent||'Project Nexus';render();});
+    function updateCounts(){const visibleCount=tasks.filter(visible).length;document.getElementById('viewSubtitle').textContent=`${visibleCount}件のタスク · ${links.filter(l=>tasks.some(t=>t.id===l[0]&&visible(t))&&tasks.some(t=>t.id===l[1]&&visible(t))).length}件のつながり`;document.getElementById('doneCount').textContent=String(tasks.filter(t=>t.done).length).padStart(2,'0');}
+    document.querySelectorAll('.nav-btn[data-filter]').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentFilter=btn.dataset.filter;document.getElementById('viewTitle').textContent=btn.querySelector('b')?.textContent||'プロジェクト・ネクサス';render();});
     document.getElementById('completeBtn').onclick=()=>{const t=tasks.find(x=>x.id===selectedId);if(!t)return;t.done=!t.done;t.progress=t.done?100:Math.min(t.progress,90);save();render();selectTask(t.id);};
-    document.getElementById('recenter').onclick=()=>{currentFilter='all';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));document.getElementById('viewTitle').textContent='Project Nexus';render();};
+    document.getElementById('recenter').onclick=()=>{currentFilter='all';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));document.getElementById('viewTitle').textContent='プロジェクト・ネクサス';render();};
     const dialog=document.getElementById('taskDialog'),form=document.getElementById('taskForm');
     document.getElementById('closeDialog').onclick=()=>dialog.close(); document.getElementById('cancelDialog').onclick=()=>dialog.close();
     document.getElementById('addBtn').onclick=()=>{const s=document.getElementById('parentSelect');s.innerHTML=tasks.filter(t=>!t.done).map(t=>`<option value="${t.id}">${t.title}</option>`).join('');dialog.showModal();};
-    form.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(form),title=String(fd.get('title')).trim();if(!title)return;const id='task-'+Date.now(),colors=['cyan','violet','lime','orange','pink'];tasks.push({id,title,short:title,category:fd.get('category'),priority:fd.get('priority'),x:25+Math.random()*50,y:27+Math.random()*52,size:82,color:colors[tasks.length%colors.length],progress:0,due:'NEW NODE',description:'Newly created task node. Add context and break it into smaller steps.',checks:[['Define next action',false]],today:false});links.push([String(fd.get('parent')),id,'related','violet']);selectedId=id;currentFilter='all';save();dialog.close();form.reset();render();selectTask(id);});
+    form.addEventListener('submit',e=>{e.preventDefault();const fd=new FormData(form),title=String(fd.get('title')).trim();if(!title)return;const id='task-'+Date.now(),colors=['cyan','violet','lime','orange','pink'];tasks.push({id,title,short:title,category:fd.get('category'),priority:fd.get('priority'),x:25+Math.random()*50,y:27+Math.random()*52,size:82,color:colors[tasks.length%colors.length],progress:0,due:'新規タスク',description:'新しく作成されたタスクです。詳しい内容を追加し、次の行動を整理しましょう。',checks:[['次の行動を決める',false]],today:false});links.push([String(fd.get('parent')),id,'related','violet']);selectedId=id;currentFilter='all';save();dialog.close();form.reset();render();selectTask(id);});
     window.addEventListener('resize',drawLinks); setInterval(drawLinks,120);
     render();selectTask(selectedId);
   </script>
