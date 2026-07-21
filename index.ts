@@ -150,7 +150,7 @@ app.put("/api/state", async (req, res) => {
   if (!sameOrigin(req)) return res.status(403).json({ error: "Forbidden" });
   const user = await currentUser(req);
   if (!user) return res.status(401).json({ error: "ログインが必要です" });
-  const { tasks, links, projects, currentProjectId } = req.body ?? {};
+  const { tasks, links, projects, currentProjectId, tutorialCompleted } = req.body ?? {};
   if (!Array.isArray(tasks) || !Array.isArray(links) || !Array.isArray(projects) || tasks.length > 500 || links.length > 2000 || projects.length > 100) {
     return res.status(400).json({ error: "保存データの形式が正しくありません" });
   }
@@ -171,8 +171,8 @@ app.put("/api/state", async (req, res) => {
     && taskIds.has(link[0]) && taskIds.has(link[1])
     && ["blocks", "related", "supports"].includes(link[2])
     && ["cyan", "violet", "lime", "orange", "pink"].includes(link[3]));
-  if (!validProjects || typeof currentProjectId !== "string" || !projectIds.has(currentProjectId) || !validTasks || !validLinks) return res.status(400).json({ error: "タスクデータに不正な値があります" });
-  await prisma.user.update({ where: { id: user.id }, data: { taskState: { tasks, links, projects, currentProjectId } } });
+  if (!validProjects || typeof currentProjectId !== "string" || !projectIds.has(currentProjectId) || typeof tutorialCompleted !== "boolean" || !validTasks || !validLinks) return res.status(400).json({ error: "タスクデータに不正な値があります" });
+  await prisma.user.update({ where: { id: user.id }, data: { taskState: { tasks, links, projects, currentProjectId, tutorialCompleted } } });
   res.json({ ok: true, savedAt: new Date().toISOString() });
 });
 

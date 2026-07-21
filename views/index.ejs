@@ -160,6 +160,8 @@
     .project-select { min-width:210px; border:1px solid var(--line); background:#0c111d; color:var(--text); border-radius:8px; padding:9px 34px 9px 12px; font-size:11px; outline:none; }
     .project-add { border:1px solid rgba(85,233,238,.25); background:rgba(85,233,238,.06); color:var(--cyan); border-radius:8px; padding:9px 12px; font-size:10px; cursor:pointer; }
     .project-add:hover { background:rgba(85,233,238,.12); }
+    .help-btn { width:32px; height:32px; border:1px solid var(--line); border-radius:50%; background:transparent; color:#7b8799; cursor:pointer; font:11px DM Mono; }
+    .help-btn:hover { color:var(--cyan); border-color:rgba(85,233,238,.35); }
     .workspace { grid-column:1; grid-row:2; }
     .workspace-head { inset:26px auto auto 30px; }
     .workspace-head .view-tools { display:none; }
@@ -171,6 +173,16 @@
     .more { font-size:18px; }
     .fab { right:24px; bottom:24px; width:auto; height:42px; padding:0 15px; border-radius:9px; font-size:11px; }
     .fab::after { content:' タスクを追加'; margin-left:4px; }
+    .tutorial-backdrop { position:fixed; inset:0; z-index:80; background:rgba(2,5,10,.72); backdrop-filter:blur(2px); }
+    .tutorial-backdrop[hidden] { display:none; }
+    .tutorial-card { position:fixed; z-index:92; left:50%; bottom:34px; transform:translateX(-50%); width:min(430px,calc(100% - 28px)); border:1px solid rgba(85,233,238,.25); border-radius:13px; padding:21px; background:#0d1320; box-shadow:0 24px 80px rgba(0,0,0,.55); }
+    .tutorial-step { color:var(--cyan); font:8px DM Mono; letter-spacing:.14em; }
+    .tutorial-card h3 { margin:9px 0 7px; font-size:17px; }
+    .tutorial-card p { margin:0; color:#8994a5; font-size:11px; line-height:1.7; }
+    .tutorial-actions { display:flex; align-items:center; justify-content:space-between; margin-top:18px; }
+    .tutorial-actions button { border:0; background:transparent; color:#6f7b8e; padding:8px; cursor:pointer; font-size:10px; }
+    .tutorial-actions .tutorial-next { min-width:92px; border:1px solid var(--cyan); border-radius:7px; color:#061014; background:var(--cyan); font-weight:700; }
+    .tutorial-focus { position:relative!important; z-index:91!important; box-shadow:0 0 0 3px rgba(85,233,238,.35),0 0 35px rgba(85,233,238,.22)!important; }
 
     @media (max-width: 760px) { body{overflow:auto}.app{height:auto;min-height:100vh;display:block}.topbar{height:62px;position:sticky;top:0;padding:0 14px;gap:10px}.brand span,.system-state,.user-meta{display:none}.project-bar{min-width:0}.project-select{min-width:0;width:100%;}.project-add{font-size:0;padding:9px 12px}.project-add::after{content:'＋';font-size:14px}.avatar{margin-left:0}.workspace{height:calc(100vh - 62px);min-height:600px}.details{top:auto;left:12px;right:12px;bottom:12px;width:auto;max-height:55vh}.fab{right:16px;bottom:16px}.workspace-head{inset:18px}.task-node{--size:84px!important}.legend{flex-wrap:wrap;width:230px}.zoom-note{display:none} }
   </style>
@@ -180,6 +192,7 @@
     <header class="topbar">
       <div class="brand"><div class="brand-mark"></div><span>NEX<em>US</em></span></div>
       <div class="project-bar"><select class="project-select" id="projectSelect" aria-label="プロジェクトを選択"></select><button class="project-add" id="addProjectBtn" type="button">＋ プロジェクト</button></div>
+      <button class="help-btn" id="tutorialHelp" type="button" title="使い方を見る">?</button>
       <div class="system-state"><i></i><span id="syncStatus">すべて同期済み</span></div>
       <div class="user-account"><div class="user-meta"><b><%= user.name %></b><form action="/logout" method="post"><button class="logout-btn" type="submit">ログアウト</button></form></div><div class="avatar"><%= initials %></div></div>
     </header>
@@ -248,6 +261,15 @@
     </form>
   </dialog>
 
+  <div class="tutorial-backdrop" id="tutorial" hidden>
+    <section class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
+      <div class="tutorial-step" id="tutorialStep">STEP 1 / 4</div>
+      <h3 id="tutorialTitle"></h3>
+      <p id="tutorialText"></p>
+      <div class="tutorial-actions"><button id="tutorialSkip" type="button">スキップ</button><button class="tutorial-next" id="tutorialNext" type="button">次へ</button></div>
+    </section>
+  </div>
+
   <script>
     const palette = { cyan:'#55e9ee', violet:'#a881ff', lime:'#b8f26d', orange:'#ffad66', pink:'#ff72b6' };
     const serverState = <%- stateJson %>;
@@ -272,13 +294,14 @@
     let links = serverState?.links || [...seedLinks];
     let projects = serverState?.projects || seedProjects;
     let activeProjectId = serverState?.currentProjectId || projects[0]?.id;
+    let tutorialCompleted = Boolean(serverState?.tutorialCompleted);
     let selectedId = null;
     const graph = document.getElementById('graph'), svg = document.getElementById('links');
 
     let queuedState = null, saving = false;
     function escapeHtml(value){ return String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char])); }
     function save(){
-      queuedState = JSON.stringify({tasks,links,projects,currentProjectId:activeProjectId});
+      queuedState = JSON.stringify({tasks,links,projects,currentProjectId:activeProjectId,tutorialCompleted});
       document.getElementById('syncStatus').textContent = '保存中…';
       flushSave();
     }
@@ -353,8 +376,21 @@
     document.getElementById('addProjectBtn').onclick=()=>{projectDialog.showModal();projectForm.querySelector('[name="projectName"]').focus();};
     document.getElementById('closeProjectDialog').onclick=()=>projectDialog.close(); document.getElementById('cancelProjectDialog').onclick=()=>projectDialog.close();
     projectForm.onsubmit=e=>{e.preventDefault();const name=String(new FormData(projectForm).get('projectName')).trim();if(!name)return;const id='project-'+Date.now();projects.push({id,name});activeProjectId=id;selectedId=null;projectDialog.close();projectForm.reset();renderProjects();render();save();};
+    const tutorialSteps=[
+      {target:'.topbar',title:'プロジェクトを切り替える',text:'ここから作業するプロジェクトを選べます。プロジェクトごとにタスク空間が分かれています。'},
+      {target:'#addProjectBtn',title:'プロジェクトを追加する',text:'「＋ プロジェクト」から、新しい空のタスク空間を作成できます。'},
+      {target:'#addBtn',title:'タスクを球体として追加する',text:'右下のボタンからタスクを追加します。球体を選んでから追加すると、自動で関係線がつながります。'},
+      {target:'.workspace',title:'タスクのつながりを見る',text:'球体の位置と線から関係性を確認できます。球体を押すと、タスクの詳細が開きます。'}
+    ];
+    let tutorialIndex=0;
+    function showTutorial(index=0){document.querySelectorAll('.tutorial-focus').forEach(el=>el.classList.remove('tutorial-focus'));tutorialIndex=index;const step=tutorialSteps[index],target=document.querySelector(step.target);target?.classList.add('tutorial-focus');document.getElementById('tutorialStep').textContent=`STEP ${index+1} / ${tutorialSteps.length}`;document.getElementById('tutorialTitle').textContent=step.title;document.getElementById('tutorialText').textContent=step.text;document.getElementById('tutorialNext').textContent=index===tutorialSteps.length-1?'はじめる':'次へ';document.getElementById('tutorial').hidden=false;}
+    function finishTutorial(){document.querySelectorAll('.tutorial-focus').forEach(el=>el.classList.remove('tutorial-focus'));document.getElementById('tutorial').hidden=true;tutorialCompleted=true;save();}
+    document.getElementById('tutorialNext').onclick=()=>tutorialIndex<tutorialSteps.length-1?showTutorial(tutorialIndex+1):finishTutorial();
+    document.getElementById('tutorialSkip').onclick=finishTutorial;
+    document.getElementById('tutorialHelp').onclick=()=>showTutorial(0);
     window.addEventListener('resize',drawLinks); setInterval(drawLinks,120);
     renderProjects();render();
+    if(!tutorialCompleted) setTimeout(()=>showTutorial(0),350);
   </script>
 </body>
 </html>
