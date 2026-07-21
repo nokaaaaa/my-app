@@ -101,7 +101,14 @@ app.post("/register", async (req, res) => {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return authPage(res, "register", "有効なメールアドレスを入力してください。", { name, email });
   if (password.length < 8 || password.length > 128) return authPage(res, "register", "パスワードは8〜128文字で入力してください。", { name, email });
   try {
-    const user = await prisma.user.create({ data: { name, email, passwordHash: await hashPassword(password) } });
+    const passwordHash = await hashPassword(password);
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        account: { create: { email, passwordHash } }
+      }
+    });
     await createSession(res, user.id);
     return res.redirect("/");
   } catch (error: any) {
@@ -115,11 +122,11 @@ app.post("/login", async (req, res) => {
   if (!sameOrigin(req)) return res.status(403).send("Forbidden");
   const email = String(req.body.email ?? "").trim().toLowerCase();
   const password = String(req.body.password ?? "");
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user?.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
+  const account = await prisma.account.findUnique({ where: { email }, include: { user: true } });
+  if (!account || !(await verifyPassword(password, account.passwordHash))) {
     return authPage(res, "login", "メールアドレスまたはパスワードが正しくありません。", { email });
   }
-  await createSession(res, user.id);
+  await createSession(res, account.user.id);
   return res.redirect("/");
 });
 

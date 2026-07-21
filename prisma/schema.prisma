@@ -16,12 +16,21 @@ model User {
   id           Int       @id @default(autoincrement())
   name         String
   age          Int?
-  email        String?   @unique
+  email        String?
   passwordHash String?
   taskState    Json?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now()) @updatedAt
   sessions     Session[]
+  account      Account?
+}
+
+model Account {
+  email        String   @id
+  passwordHash String
+  createdAt    DateTime @default(now())
+  userId       Int      @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {
