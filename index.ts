@@ -150,10 +150,16 @@ app.put("/api/state", async (req, res) => {
   if (!sameOrigin(req)) return res.status(403).json({ error: "Forbidden" });
   const user = await currentUser(req);
   if (!user) return res.status(401).json({ error: "ログインが必要です" });
-  const { tasks, links } = req.body ?? {};
-  if (!Array.isArray(tasks) || !Array.isArray(links) || tasks.length > 500 || links.length > 2000) {
+  const { tasks, links, projects, currentProjectId } = req.body ?? {};
+  if (!Array.isArray(tasks) || !Array.isArray(links) || !Array.isArray(projects) || tasks.length > 500 || links.length > 2000 || projects.length > 100) {
     return res.status(400).json({ error: "保存データの形式が正しくありません" });
   }
+  const projectIds = new Set<string>();
+  const validProjects = projects.every((project: any) => {
+    if (!project || typeof project !== "object" || typeof project.id !== "string" || !/^[a-zA-Z0-9_-]{1,80}$/.test(project.id) || projectIds.has(project.id)) return false;
+    projectIds.add(project.id);
+    return typeof project.name === "string" && project.name.length >= 1 && project.name.length <= 40;
+  });
   const taskIds = new Set<string>();
   const validTasks = tasks.every((task: any) => {
     if (!task || typeof task !== "object" || typeof task.id !== "string" || !/^[a-zA-Z0-9_-]{1,80}$/.test(task.id) || taskIds.has(task.id)) return false;
@@ -165,8 +171,8 @@ app.put("/api/state", async (req, res) => {
     && taskIds.has(link[0]) && taskIds.has(link[1])
     && ["blocks", "related", "supports"].includes(link[2])
     && ["cyan", "violet", "lime", "orange", "pink"].includes(link[3]));
-  if (!validTasks || !validLinks) return res.status(400).json({ error: "タスクデータに不正な値があります" });
-  await prisma.user.update({ where: { id: user.id }, data: { taskState: { tasks, links } } });
+  if (!validProjects || typeof currentProjectId !== "string" || !projectIds.has(currentProjectId) || !validTasks || !validLinks) return res.status(400).json({ error: "タスクデータに不正な値があります" });
+  await prisma.user.update({ where: { id: user.id }, data: { taskState: { tasks, links, projects, currentProjectId } } });
   res.json({ ok: true, savedAt: new Date().toISOString() });
 });
 

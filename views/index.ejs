@@ -151,15 +151,35 @@
     .modal-actions button {border:1px solid var(--line);border-radius:7px;background:transparent;padding:9px 15px;cursor:pointer;font-size:10px;}
     .modal-actions .primary {background:var(--cyan);border-color:var(--cyan);color:#061014;font-weight:700;}
 
-    @media (max-width: 1050px) { .app { grid-template-columns:72px 1fr 280px; } .brand {width:50px}.brand span,.nav-btn b,.nav-btn span:last-child,.nav-label,.focus-card {display:none}.nav-btn{justify-content:center}.sidebar{padding-inline:10px}.fab{right:302px} }
-    @media (max-width: 760px) { body{overflow:auto}.app{height:auto;min-height:100vh;display:block}.topbar{height:62px;position:sticky;top:0}.brand{width:auto}.brand span{display:inline}.top-copy,.system-state{display:none}.avatar{margin-left:auto}.sidebar{display:none}.workspace{height:calc(100vh - 62px);min-height:600px}.details{display:none}.fab{right:20px;bottom:22px}.workspace-head{inset:18px}.task-node{--size:84px!important}.legend{flex-wrap:wrap;width:230px}.zoom-note{display:none} }
+    /* Simplified project workspace */
+    .app { grid-template-columns:1fr; grid-template-rows:68px 1fr; }
+    .topbar { padding:0 24px; gap:24px; }
+    .brand { width:auto; margin-right:16px; }
+    .sidebar { display:none; }
+    .project-bar { flex:1; display:flex; align-items:center; gap:8px; }
+    .project-select { min-width:210px; border:1px solid var(--line); background:#0c111d; color:var(--text); border-radius:8px; padding:9px 34px 9px 12px; font-size:11px; outline:none; }
+    .project-add { border:1px solid rgba(85,233,238,.25); background:rgba(85,233,238,.06); color:var(--cyan); border-radius:8px; padding:9px 12px; font-size:10px; cursor:pointer; }
+    .project-add:hover { background:rgba(85,233,238,.12); }
+    .workspace { grid-column:1; grid-row:2; }
+    .workspace-head { inset:26px auto auto 30px; }
+    .workspace-head .view-tools { display:none; }
+    .details { position:fixed; z-index:40; top:86px; right:18px; bottom:18px; width:286px; padding:20px; border:1px solid var(--line); border-radius:12px; background:rgba(12,17,29,.92); backdrop-filter:blur(22px); transform:translateX(calc(100% + 40px)); opacity:0; transition:transform .25s ease,opacity .2s ease; box-shadow:0 24px 70px rgba(0,0,0,.38); }
+    .details.open { transform:none; opacity:1; }
+    .details .section-label,.details .people,.details .check-list { display:none; }
+    .details .relation-list { margin-top:18px; }
+    .status-pill { margin-top:18px; }
+    .more { font-size:18px; }
+    .fab { right:24px; bottom:24px; width:auto; height:42px; padding:0 15px; border-radius:9px; font-size:11px; }
+    .fab::after { content:' タスクを追加'; margin-left:4px; }
+
+    @media (max-width: 760px) { body{overflow:auto}.app{height:auto;min-height:100vh;display:block}.topbar{height:62px;position:sticky;top:0;padding:0 14px;gap:10px}.brand span,.system-state,.user-meta{display:none}.project-bar{min-width:0}.project-select{min-width:0;width:100%;}.project-add{font-size:0;padding:9px 12px}.project-add::after{content:'＋';font-size:14px}.avatar{margin-left:0}.workspace{height:calc(100vh - 62px);min-height:600px}.details{top:auto;left:12px;right:12px;bottom:12px;width:auto;max-height:55vh}.fab{right:16px;bottom:16px}.workspace-head{inset:18px}.task-node{--size:84px!important}.legend{flex-wrap:wrap;width:230px}.zoom-note{display:none} }
   </style>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
       <div class="brand"><div class="brand-mark"></div><span>NEX<em>US</em></span></div>
-      <div class="top-copy"><h1>空間タスク管理システム</h1><p>ワークスペース / プロダクトローンチ · 2026年7月21日</p></div>
+      <div class="project-bar"><select class="project-select" id="projectSelect" aria-label="プロジェクトを選択"></select><button class="project-add" id="addProjectBtn" type="button">＋ プロジェクト</button></div>
       <div class="system-state"><i></i><span id="syncStatus">すべて同期済み</span></div>
       <div class="user-account"><div class="user-meta"><b><%= user.name %></b><form action="/logout" method="post"><button class="logout-btn" type="submit">ログアウト</button></form></div><div class="avatar"><%= initials %></div></div>
     </header>
@@ -186,7 +206,6 @@
       <div class="workspace-head">
         <div><div class="eyebrow">ライブ・コンステレーション</div><h2 id="viewTitle">プロジェクト・ネクサス</h2><p id="viewSubtitle">8件のタスク · 11件のつながり</p></div>
         <div class="view-tools">
-          <button class="icon-btn active" title="関係表示"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="10" cy="18" r="2"/><path d="m8 7 8 1M7 8l2 8m3 1 5-7"/></svg></button>
           <button class="icon-btn" id="recenter" title="表示をリセット"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg></button>
         </div>
       </div>
@@ -196,7 +215,7 @@
     </section>
 
     <aside class="details" id="details">
-      <div class="details-top"><span>タスク詳細</span><button class="more">•••</button></div>
+      <div class="details-top"><span>タスク詳細</span><button class="more" id="closeDetails" title="閉じる">×</button></div>
       <div class="status-pill"><i></i><span id="detailStatus">進行中</span></div>
       <h3 id="detailTitle">ローンチ戦略の策定</h3>
       <p class="description" id="detailDescription">次回リリースに向けたメッセージ、主要チャネル、実行スケジュールを設計します。</p>
@@ -210,12 +229,20 @@
   </main>
   <button class="fab" id="addBtn" title="タスクを追加">＋</button>
 
+  <dialog id="projectDialog">
+    <form class="modal" id="projectForm" method="dialog">
+      <header><h3>プロジェクトを追加</h3><button class="close" id="closeProjectDialog" type="button">×</button></header>
+      <div class="field"><label>プロジェクト名</label><input name="projectName" placeholder="例：新サービスのローンチ" required maxlength="40"></div>
+      <div class="modal-actions"><button id="cancelProjectDialog" type="button">キャンセル</button><button class="primary" type="submit">追加する</button></div>
+    </form>
+  </dialog>
+
   <dialog id="taskDialog">
     <form class="modal" id="taskForm" method="dialog">
       <header><h3>新しいタスクを追加</h3><button class="close" id="closeDialog" type="button">×</button></header>
       <div class="field"><label>タスク名</label><input name="title" placeholder="何をする必要がありますか？" required maxlength="42"></div>
       <div class="field"><label>カテゴリー</label><select name="category"><option value="product">プロダクト</option><option value="research">リサーチ</option><option value="personal">個人</option></select></div>
-      <div class="field"><label>接続先（選択中の球体）</label><select name="parent" id="parentSelect"></select><div class="connection-preview"><i></i><span><b id="connectionName">ローンチ戦略</b> から関係線をつなぎます</span></div></div>
+      <div class="field" id="connectionField"><label>接続先（選択中の球体）</label><select name="parent" id="parentSelect"></select><div class="connection-preview"><i></i><span><b id="connectionName">ローンチ戦略</b> から関係線をつなぎます</span></div></div>
       <div class="field"><label>優先度</label><select name="priority"><option value="HIGH">高</option><option value="MEDIUM" selected>中</option><option value="LOW">低</option></select></div>
       <div class="modal-actions"><button id="cancelDialog" type="button">キャンセル</button><button class="primary" type="submit">タスクを追加</button></div>
     </form>
@@ -240,15 +267,18 @@
     const seedLinks = [
       ['research','launch','blocks','cyan'],['launch','prototype','related','violet'],['launch','design','blocks','cyan'],['prototype','metrics','supports','lime'],['design','brief','supports','lime'],['launch','metrics','related','violet'],['launch','brief','supports','lime'],['qa','design','blocks','cyan'],['brief','retro','related','violet'],['prototype','research','related','violet'],['metrics','retro','supports','lime']
     ];
+    const seedProjects = [{id:'project-nexus',name:'プロジェクト・ネクサス'}];
     let tasks = serverState?.tasks || seedTasks;
     let links = serverState?.links || [...seedLinks];
-    let selectedId = 'launch', currentFilter = 'all';
+    let projects = serverState?.projects || seedProjects;
+    let activeProjectId = serverState?.currentProjectId || projects[0]?.id;
+    let selectedId = null;
     const graph = document.getElementById('graph'), svg = document.getElementById('links');
 
     let queuedState = null, saving = false;
     function escapeHtml(value){ return String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char])); }
     function save(){
-      queuedState = JSON.stringify({tasks,links});
+      queuedState = JSON.stringify({tasks,links,projects,currentProjectId:activeProjectId});
       document.getElementById('syncStatus').textContent = '保存中…';
       flushSave();
     }
@@ -264,7 +294,7 @@
       }
       saving = false;
     }
-    function visible(t){ if(currentFilter==='all')return true;if(currentFilter==='done')return t.done;if(currentFilter==='priority')return t.priority==='HIGH'&&!t.done;if(currentFilter==='today')return t.today&&!t.done;return t.category===currentFilter&&!t.done; }
+    function visible(t){ return (t.projectId||'project-nexus')===activeProjectId; }
     function render(){
       graph.querySelectorAll('.task-node').forEach(n=>n.remove()); svg.innerHTML='';
       tasks.forEach((t,i)=>{
@@ -285,6 +315,7 @@
       });
     }
     function selectTask(id){ selectedId=id; const t=tasks.find(x=>x.id===id); if(!t)return;
+      document.getElementById('details').classList.add('open');
       document.querySelectorAll('.task-node').forEach(n=>n.classList.toggle('selected',n.dataset.id===id));
       document.getElementById('detailTitle').textContent=t.title; document.getElementById('detailDescription').textContent=t.description;
       document.getElementById('detailDue').textContent=t.due; document.getElementById('detailPriority').textContent='● '+(priorityNames[t.priority]||t.priority);
@@ -295,15 +326,15 @@
     }
     function updateCheckProgress(t){const done=(t.checks||[]).filter(c=>c[1]).length;document.getElementById('subProgress').textContent=`${done}/${(t.checks||[]).length}`;}
     function updateCounts(){const visibleCount=tasks.filter(visible).length;document.getElementById('viewSubtitle').textContent=`${visibleCount}件のタスク · ${links.filter(l=>tasks.some(t=>t.id===l[0]&&visible(t))&&tasks.some(t=>t.id===l[1]&&visible(t))).length}件のつながり`;document.getElementById('doneCount').textContent=String(tasks.filter(t=>t.done).length).padStart(2,'0');}
-    document.querySelectorAll('.nav-btn[data-filter]').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentFilter=btn.dataset.filter;document.getElementById('viewTitle').textContent=btn.querySelector('b')?.textContent||'プロジェクト・ネクサス';render();});
     document.getElementById('completeBtn').onclick=()=>{const t=tasks.find(x=>x.id===selectedId);if(!t)return;t.done=!t.done;t.progress=t.done?100:Math.min(t.progress,90);save();render();selectTask(t.id);};
-    document.getElementById('recenter').onclick=()=>{currentFilter='all';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter==='all'));document.getElementById('viewTitle').textContent='プロジェクト・ネクサス';render();};
+    document.getElementById('closeDetails').onclick=()=>document.getElementById('details').classList.remove('open');
     const dialog=document.getElementById('taskDialog'),form=document.getElementById('taskForm');
     document.getElementById('closeDialog').onclick=()=>dialog.close(); document.getElementById('cancelDialog').onclick=()=>dialog.close();
-    function updateConnectionPreview(){const parent=tasks.find(t=>t.id===document.getElementById('parentSelect').value);document.getElementById('connectionName').textContent=parent?.short||parent?.title||'選択したタスク';}
+    function updateConnectionPreview(){const parent=tasks.find(t=>t.id===document.getElementById('parentSelect').value);document.getElementById('connectionName').textContent=parent?.short||parent?.title||'最初のタスク';}
     document.getElementById('addBtn').onclick=()=>{
-      const s=document.getElementById('parentSelect'), activeTask=tasks.find(t=>t.id===selectedId);
-      s.innerHTML=tasks.map(t=>`<option value="${escapeHtml(t.id)}">${escapeHtml(t.title)}</option>`).join('');
+      const s=document.getElementById('parentSelect'), activeTask=tasks.find(t=>t.id===selectedId&&visible(t)), projectTasks=tasks.filter(visible);
+      document.getElementById('connectionField').style.display=projectTasks.length?'grid':'none';
+      s.innerHTML=projectTasks.map(t=>`<option value="${escapeHtml(t.id)}">${escapeHtml(t.title)}</option>`).join('');
       if(activeTask) s.value=activeTask.id;
       updateConnectionPreview(); dialog.showModal(); form.querySelector('[name="title"]').focus();
     };
@@ -313,11 +344,17 @@
       const id='task-'+Date.now(), parentId=String(fd.get('parent')), parent=tasks.find(t=>t.id===parentId), colors=['cyan','violet','lime','orange','pink'];
       const siblingCount=links.filter(l=>l[0]===parentId||l[1]===parentId).length, angle=(siblingCount*67+35)*Math.PI/180;
       const x=Math.max(12,Math.min(88,(parent?.x??50)+Math.cos(angle)*19)), y=Math.max(20,Math.min(84,(parent?.y??50)+Math.sin(angle)*16));
-      tasks.push({id,title,short:title,category:fd.get('category'),priority:fd.get('priority'),x,y,size:82,color:colors[tasks.length%colors.length],progress:0,due:'新規タスク',description:'新しく作成されたタスクです。詳しい内容を追加し、次の行動を整理しましょう。',checks:[['次の行動を決める',false]],today:false});
-      links.push([parentId,id,'related','violet']); selectedId=id; currentFilter='all'; save(); dialog.close(); form.reset(); render(); selectTask(id);
+      tasks.push({id,title,short:title,projectId:activeProjectId,category:fd.get('category'),priority:fd.get('priority'),x,y,size:82,color:colors[tasks.length%colors.length],progress:0,due:'新規タスク',description:'新しく作成されたタスクです。',checks:[],today:false});
+      if(parent) links.push([parentId,id,'related','violet']); selectedId=id; save(); dialog.close(); form.reset(); render(); selectTask(id);
     });
+    const projectDialog=document.getElementById('projectDialog'),projectForm=document.getElementById('projectForm'),projectSelect=document.getElementById('projectSelect');
+    function renderProjects(){projectSelect.innerHTML=projects.map(p=>`<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('');projectSelect.value=activeProjectId;const active=projects.find(p=>p.id===activeProjectId);document.getElementById('viewTitle').textContent=active?.name||'プロジェクト';}
+    projectSelect.onchange=()=>{activeProjectId=projectSelect.value;selectedId=null;document.getElementById('details').classList.remove('open');renderProjects();render();save();};
+    document.getElementById('addProjectBtn').onclick=()=>{projectDialog.showModal();projectForm.querySelector('[name="projectName"]').focus();};
+    document.getElementById('closeProjectDialog').onclick=()=>projectDialog.close(); document.getElementById('cancelProjectDialog').onclick=()=>projectDialog.close();
+    projectForm.onsubmit=e=>{e.preventDefault();const name=String(new FormData(projectForm).get('projectName')).trim();if(!name)return;const id='project-'+Date.now();projects.push({id,name});activeProjectId=id;selectedId=null;projectDialog.close();projectForm.reset();renderProjects();render();save();};
     window.addEventListener('resize',drawLinks); setInterval(drawLinks,120);
-    render();selectTask(selectedId);
+    renderProjects();render();
   </script>
 </body>
 </html>
