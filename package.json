@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "tsx index.ts",
-    "db:dev": "prisma dev"
+    "db:dev": "NODE_OPTIONS=--experimental-sqlite prisma dev"
   },
   "devDependencies": {
     "@types/node": "^26.0.0",

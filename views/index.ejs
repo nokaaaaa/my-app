@@ -48,6 +48,11 @@
     .system-state { color: #9aa5b5; display: flex; align-items: center; gap: 9px; margin-right: 23px; font: 10px DM Mono, monospace; letter-spacing: .08em; }
     .system-state i { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 10px var(--lime); }
     .avatar { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: linear-gradient(145deg,#3a4858,#10141e); display: grid; place-items: center; font-size: 10px; }
+    .user-account { display:flex; align-items:center; gap:9px; }
+    .user-meta { text-align:right; line-height:1.15; }
+    .user-meta b { display:block; font-size:10px; font-weight:600; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .logout-btn { border:0; background:transparent; color:#586477; cursor:pointer; padding:3px 0; font-size:8px; }
+    .logout-btn:hover { color:var(--cyan); }
 
     .sidebar { grid-column: 1; grid-row: 2; border-right: 1px solid var(--line); padding: 24px 16px; display: flex; flex-direction: column; background: rgba(9,13,23,.44); z-index: 10; }
     .nav-label { color: #4e596b; font: 9px DM Mono, monospace; letter-spacing: .18em; padding: 0 10px 10px; }
@@ -155,8 +160,8 @@
     <header class="topbar">
       <div class="brand"><div class="brand-mark"></div><span>NEX<em>US</em></span></div>
       <div class="top-copy"><h1>空間タスク管理システム</h1><p>ワークスペース / プロダクトローンチ · 2026年7月21日</p></div>
-      <div class="system-state"><i></i>すべて同期済み</div>
-      <div class="avatar">YK</div>
+      <div class="system-state"><i></i><span id="syncStatus">すべて同期済み</span></div>
+      <div class="user-account"><div class="user-meta"><b><%= user.name %></b><form action="/logout" method="post"><button class="logout-btn" type="submit">ログアウト</button></form></div><div class="avatar"><%= initials %></div></div>
     </header>
 
     <aside class="sidebar">
@@ -218,6 +223,7 @@
 
   <script>
     const palette = { cyan:'#55e9ee', violet:'#a881ff', lime:'#b8f26d', orange:'#ffad66', pink:'#ff72b6' };
+    const serverState = <%- stateJson %>;
     const categoryNames = { product:'プロダクト', research:'リサーチ', personal:'個人' };
     const priorityNames = { HIGH:'高', MEDIUM:'中', LOW:'低' };
     const relationNames = { blocks:'先行タスク', related:'関連', supports:'サポート' };
@@ -234,16 +240,30 @@
     const seedLinks = [
       ['research','launch','blocks','cyan'],['launch','prototype','related','violet'],['launch','design','blocks','cyan'],['prototype','metrics','supports','lime'],['design','brief','supports','lime'],['launch','metrics','related','violet'],['launch','brief','supports','lime'],['qa','design','blocks','cyan'],['brief','retro','related','violet'],['prototype','research','related','violet'],['metrics','retro','supports','lime']
     ];
-    let tasks, links;
-    try {
-      const savedState = JSON.parse(localStorage.getItem('nexus-state-ja-v2'));
-      tasks = savedState?.tasks || seedTasks;
-      links = savedState?.links || [...seedLinks];
-    } catch { tasks = seedTasks; links = [...seedLinks]; }
+    let tasks = serverState?.tasks || seedTasks;
+    let links = serverState?.links || [...seedLinks];
     let selectedId = 'launch', currentFilter = 'all';
     const graph = document.getElementById('graph'), svg = document.getElementById('links');
 
-    function save(){ localStorage.setItem('nexus-state-ja-v2',JSON.stringify({tasks,links})); }
+    let queuedState = null, saving = false;
+    function escapeHtml(value){ return String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char])); }
+    function save(){
+      queuedState = JSON.stringify({tasks,links});
+      document.getElementById('syncStatus').textContent = '保存中…';
+      flushSave();
+    }
+    async function flushSave(){
+      if(saving) return; saving = true;
+      while(queuedState){
+        const payload = queuedState; queuedState = null;
+        try {
+          const response = await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:payload,keepalive:true});
+          if(!response.ok) throw new Error('save failed');
+          if(!queuedState) document.getElementById('syncStatus').textContent = 'すべて同期済み';
+        } catch { queuedState = null; document.getElementById('syncStatus').textContent = '保存できませんでした'; }
+      }
+      saving = false;
+    }
     function visible(t){ if(currentFilter==='all')return true;if(currentFilter==='done')return t.done;if(currentFilter==='priority')return t.priority==='HIGH'&&!t.done;if(currentFilter==='today')return t.today&&!t.done;return t.category===currentFilter&&!t.done; }
     function render(){
       graph.querySelectorAll('.task-node').forEach(n=>n.remove()); svg.innerHTML='';
@@ -251,7 +271,7 @@
         if(!visible(t)) return;
         const node=document.createElement('button'); node.className='task-node'+(t.id===selectedId?' selected':'')+(t.done?' done':''); node.dataset.id=t.id;
         node.style.cssText=`left:${t.x}%;top:${t.y}%;--size:${t.size}px;--node:${palette[t.color]};--speed:${6+(i%5)}s;animation-delay:${-i*.8}s`;
-        node.innerHTML=`<span class="node-content"><small>${categoryNames[t.category]||t.category}</small><b>${t.short||t.title}</b><span class="node-progress"><i style="width:${t.progress}%"></i></span></span>`;
+        node.innerHTML=`<span class="node-content"><small>${escapeHtml(categoryNames[t.category]||t.category)}</small><b>${escapeHtml(t.short||t.title)}</b><span class="node-progress"><i style="width:${Number(t.progress)||0}%"></i></span></span>`;
         node.onclick=()=>selectTask(t.id); graph.appendChild(node);
       });
       requestAnimationFrame(drawLinks); updateCounts();
@@ -269,8 +289,8 @@
       document.getElementById('detailTitle').textContent=t.title; document.getElementById('detailDescription').textContent=t.description;
       document.getElementById('detailDue').textContent=t.due; document.getElementById('detailPriority').textContent='● '+(priorityNames[t.priority]||t.priority);
       document.getElementById('detailStatus').textContent=t.done?'完了':'進行中'; document.querySelector('.status-pill').style.color=t.done?'var(--lime)':'var(--cyan)';
-      const checks=document.getElementById('checkList'); checks.innerHTML=''; (t.checks||[]).forEach((c,i)=>{const l=document.createElement('label');l.className='check';l.innerHTML=`<input type="checkbox" ${c[1]?'checked':''}><span>${c[0]}</span>`;l.querySelector('input').onchange=e=>{t.checks[i][1]=e.target.checked;updateCheckProgress(t);save();};checks.appendChild(l)}); updateCheckProgress(t);
-      const rel=document.getElementById('relationList');rel.innerHTML='';links.filter(l=>l[0]===id||l[1]===id).forEach(l=>{const other=tasks.find(x=>x.id===(l[0]===id?l[1]:l[0]));if(!other)return;const el=document.createElement('div');el.className='relation';el.style.setProperty('--dot',palette[l[3]]);el.innerHTML=`<i></i><div><b>${other.short||other.title}</b><small>${relationNames[l[2]]||l[2]}</small></div>`;el.onclick=()=>selectTask(other.id);rel.appendChild(el)});
+      const checks=document.getElementById('checkList'); checks.innerHTML=''; (t.checks||[]).forEach((c,i)=>{const l=document.createElement('label');l.className='check';l.innerHTML=`<input type="checkbox" ${c[1]?'checked':''}><span>${escapeHtml(c[0])}</span>`;l.querySelector('input').onchange=e=>{t.checks[i][1]=e.target.checked;updateCheckProgress(t);save();};checks.appendChild(l)}); updateCheckProgress(t);
+      const rel=document.getElementById('relationList');rel.innerHTML='';links.filter(l=>l[0]===id||l[1]===id).forEach(l=>{const other=tasks.find(x=>x.id===(l[0]===id?l[1]:l[0]));if(!other)return;const el=document.createElement('div');el.className='relation';el.style.setProperty('--dot',palette[l[3]]);el.innerHTML=`<i></i><div><b>${escapeHtml(other.short||other.title)}</b><small>${escapeHtml(relationNames[l[2]]||l[2])}</small></div>`;el.onclick=()=>selectTask(other.id);rel.appendChild(el)});
       document.getElementById('completeBtn').textContent=t.done?'タスクを再開する':'タスクを完了する'; drawLinks();
     }
     function updateCheckProgress(t){const done=(t.checks||[]).filter(c=>c[1]).length;document.getElementById('subProgress').textContent=`${done}/${(t.checks||[]).length}`;}
@@ -283,7 +303,7 @@
     function updateConnectionPreview(){const parent=tasks.find(t=>t.id===document.getElementById('parentSelect').value);document.getElementById('connectionName').textContent=parent?.short||parent?.title||'選択したタスク';}
     document.getElementById('addBtn').onclick=()=>{
       const s=document.getElementById('parentSelect'), activeTask=tasks.find(t=>t.id===selectedId);
-      s.innerHTML=tasks.map(t=>`<option value="${t.id}">${t.title}</option>`).join('');
+      s.innerHTML=tasks.map(t=>`<option value="${escapeHtml(t.id)}">${escapeHtml(t.title)}</option>`).join('');
       if(activeTask) s.value=activeTask.id;
       updateConnectionPreview(); dialog.showModal(); form.querySelector('[name="title"]').focus();
     };

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070a12">
+  <title><%= mode === 'login' ? 'ログイン' : 'アカウント作成' %> — NEXUS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%}body{min-height:100vh;display:grid;place-items:center;color:#eef3f8;font-family:Inter,"Noto Sans JP",sans-serif;background:radial-gradient(circle at 50% 42%,rgba(31,111,126,.2),transparent 28%),radial-gradient(circle at 78% 15%,rgba(122,77,188,.12),transparent 25%),#070a12;overflow:hidden}
+    body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(106,145,170,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(106,145,170,.06) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(circle at center,#000,transparent 72%)}
+    .orb{position:fixed;border-radius:50%;filter:blur(.2px);pointer-events:none}.orb.one{width:150px;height:150px;left:12%;top:15%;background:radial-gradient(circle at 35% 25%,#b0ffff,#1a7885 16%,#0d1724 65%);box-shadow:0 0 60px rgba(85,233,238,.16);opacity:.35}.orb.two{width:90px;height:90px;right:15%;bottom:18%;background:radial-gradient(circle at 35% 25%,#e6d7ff,#684da4 20%,#0d101d 68%);box-shadow:0 0 50px rgba(168,129,255,.18);opacity:.4}
+    .auth{position:relative;width:min(410px,calc(100% - 32px));padding:34px;border:1px solid rgba(153,180,211,.14);border-radius:14px;background:rgba(13,18,30,.86);backdrop-filter:blur(22px);box-shadow:0 30px 90px rgba(0,0,0,.42)}
+    .brand{display:flex;align-items:center;justify-content:center;gap:12px;font-weight:700;letter-spacing:.22em;font-size:13px;margin-bottom:28px}.brand-mark{width:30px;height:30px;border:1px solid rgba(85,233,238,.65);transform:rotate(45deg);border-radius:7px;position:relative;box-shadow:0 0 17px rgba(85,233,238,.14)}.brand-mark::after{content:"";position:absolute;inset:8px;border:1px solid #55e9ee;border-radius:50%}.brand em{color:#55e9ee;font-style:normal}
+    .eyebrow{text-align:center;color:#55e9ee;font:9px DM Mono;letter-spacing:.16em}.auth h1{text-align:center;margin:9px 0 7px;font-size:24px;letter-spacing:-.04em}.lead{text-align:center;color:#717d91;font-size:11px;line-height:1.7;margin:0 0 25px}
+    .error{margin-bottom:16px;border:1px solid rgba(255,114,182,.25);background:rgba(255,114,182,.07);color:#ff9aca;border-radius:7px;padding:10px 12px;font-size:10px;line-height:1.5}
+    .field{display:grid;gap:7px;margin-bottom:14px}.field label{color:#687487;font:9px DM Mono;letter-spacing:.1em}.field input{width:100%;border:1px solid rgba(153,180,211,.14);background:#090e18;color:#eef3f8;border-radius:8px;padding:12px;outline:none;font-size:12px}.field input:focus{border-color:rgba(85,233,238,.55);box-shadow:0 0 0 3px rgba(85,233,238,.05)}
+    .submit{width:100%;margin-top:8px;border:1px solid #55e9ee;background:#55e9ee;color:#061014;border-radius:8px;padding:12px;cursor:pointer;font-weight:700;font-size:11px;letter-spacing:.06em;box-shadow:0 0 22px rgba(85,233,238,.12)}.submit:hover{background:#7ff4f7}.switch{text-align:center;color:#687487;font-size:10px;margin:20px 0 0}.switch a{color:#55e9ee;text-decoration:none;margin-left:4px}.security{text-align:center;color:#3f4a5d;font:8px DM Mono;letter-spacing:.08em;margin-top:24px}
+  </style>
+</head>
+<body>
+  <div class="orb one"></div><div class="orb two"></div>
+  <main class="auth">
+    <div class="brand"><div class="brand-mark"></div><span>NEX<em>US</em></span></div>
+    <div class="eyebrow">PERSONAL TASK SPACE</div>
+    <h1><%= mode === 'login' ? 'おかえりなさい' : 'アカウントを作成' %></h1>
+    <p class="lead"><%= mode === 'login' ? '自分だけのタスク空間へアクセスします。' : 'タスクのつながりを、あなた専用の空間に保存します。' %></p>
+    <% if (error) { %><div class="error"><%= error %></div><% } %>
+    <form action="/<%= mode %>" method="post">
+      <% if (mode === 'register') { %><div class="field"><label>表示名</label><input type="text" name="name" value="<%= values.name || '' %>" autocomplete="name" maxlength="40" required></div><% } %>
+      <div class="field"><label>メールアドレス</label><input type="email" name="email" value="<%= values.email || '' %>" autocomplete="email" maxlength="254" required></div>
+      <div class="field"><label>パスワード</label><input type="password" name="password" autocomplete="<%= mode === 'login' ? 'current-password' : 'new-password' %>" minlength="8" maxlength="128" required></div>
+      <button class="submit" type="submit"><%= mode === 'login' ? 'ログイン' : 'アカウントを作成' %></button>
+    </form>
+    <% if (mode === 'login') { %><p class="switch">初めて利用しますか？<a href="/register">新規登録</a></p><% } else { %><p class="switch">すでにアカウントをお持ちですか？<a href="/login">ログイン</a></p><% } %>
+    <div class="security">ENCRYPTED · PRIVATE · SYNCHRONIZED</div>
+  </main>
+</body>
+</html>
